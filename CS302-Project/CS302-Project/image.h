@@ -34,4 +34,9 @@ void testBranchFunction(){
 	"branch";
 	}
 
+void addedFromMaster(){
+	cout << "This function added in master.";
+	return;
+	}
+
 #endif
