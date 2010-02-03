@@ -14,5 +14,8 @@ class ImageType {
    int **pixelValue;
 };
 //Added a comment in the test branch.
-
+void testBranchFunction(){
+	cout << "Testing how it affects changes when you,
+	branch";
+	}
 #endif
