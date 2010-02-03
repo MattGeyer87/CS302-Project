@@ -10,8 +10,9 @@ using namespace std;
 void readImageHeader(char[], int&, int&, int&, bool&);
 void readImage(char[], ImageType&);
 void writeImage(char[], ImageType&);
+int not_main();
 
-int main()
+int not_main()
 {
  int i, j; 
  int M, N, Q;
