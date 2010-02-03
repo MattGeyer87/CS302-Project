@@ -13,6 +13,6 @@ class ImageType {
    int N, M, Q;
    int **pixelValue;
 };
-
+// Test lol
 
 #endif
