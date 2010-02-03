@@ -3,7 +3,7 @@
 
 // a simple example - you would need to add more funtions
 
-// Testing some shit
+
 
 class ImageType {
  public:
