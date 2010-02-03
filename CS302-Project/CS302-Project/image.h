@@ -15,4 +15,9 @@ class ImageType {
 };
 // Test lol
 
+void testFunction(){
+	cout << "Just testing how function changes the main file.." << endl;
+	return;
+}
+
 #endif
