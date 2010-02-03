@@ -1,10 +1,6 @@
 #ifndef IMAGE_H
 #define IMAGE_H
 
-// a simple example - you would need to add more funtions
-
-
-
 class ImageType {
  public:
    ImageType();
@@ -17,5 +13,6 @@ class ImageType {
    int N, M, Q;
    int **pixelValue;
 };
+
 
 #endif
