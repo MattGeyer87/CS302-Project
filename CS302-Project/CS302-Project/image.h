@@ -24,8 +24,9 @@ void testFunction(){
 	return;
 }
 
-//Added a comment in the test branch.
+//Added a comment in the test branch.a
 void testBranchFunction(){
+	cout << "Made this change from inside mattDev branch";
 	cout << "Testing how it affects changes when you",
 	"branch";
 	}
