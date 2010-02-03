@@ -39,4 +39,9 @@ void addedFromMaster(){
 	return;
 	}
 
+void addMaster(){
+	cout << "lala";
+	return;
+	}
+
 #endif
