@@ -13,6 +13,6 @@ class ImageType {
    int N, M, Q;
    int **pixelValue;
 };
-
+//Added a comment in the test branch.
 
 #endif
