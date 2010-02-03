@@ -21,6 +21,8 @@ class ImageType {
 
 void testFunction(){
 	cout << "Just testing how function changes the main file.." << endl;
+	cout << "This change i made inside of the master branch..";
+	cout << "I guess changing the master changes the other branch?";
 	return;
 }
 
