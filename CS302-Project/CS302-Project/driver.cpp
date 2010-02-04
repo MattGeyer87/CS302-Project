@@ -18,12 +18,6 @@ void writeImage(char[], ImageType&);
 
 // Our function protoypes
 int menu();
-/*
-void rastToCart(int, int, int&, int&);
-void cartToPolar(int, int, double&, double&);
-void polarToCart(double, double, int&, int&);
-void cartToRast(int, int, int&, int&);
-*/
 void rotateImage( ImageType&, ImageType&, double);
 
 
@@ -157,7 +151,6 @@ void rotateImage( ImageType& source, ImageType& dest, double angle){
 
 			// next convert from cartesian to polar so that we can rotate
 			r = sqrt((double)( x * x + y * y ));
-
 			if( x == 0 ){
 				if( y == 0 ){
 					source.getPixelVal(j , i, newVal);
