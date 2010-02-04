@@ -76,11 +76,17 @@ int main(){
 
 			case ROTATE:
 				// rotate an image by an angle
-				rotateImage( *iptr, *img, 12 );
-				writeImage( "outie.pgm" , *img );
+				iptr->rotate(45);
+				writeImage( "outie2.pgm" , *iptr );
 
 			case INFO:
 				// INFO logic
+				break;
+
+			case AVGGL:
+				// Print average gray level
+				cout << endl << "The average gray level for your image is: ";
+				cout << iptr->getMeanGray() << endl;
 				break;
 
 			case QUIT:
@@ -112,6 +118,7 @@ int menu(){
 	cout << "3 - Rotate Image." << endl;
 	cout << "4 - Get a pixel value." << endl;
 	cout << "5 - Set a pixel value." << endl;
+	cout << "8 - See Average Gray Level. " << endl;
 	cout << "11 - Exit the program." << endl;
 	cout << endl << "Enter your choice: ";
 	cin >> choice;
