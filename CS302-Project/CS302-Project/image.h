@@ -14,4 +14,7 @@ class ImageType {
    int **pixelValue;
 };
 
+// rotate an image of type ImageType
+void rotateImage( ImageType&, ImageType&, double);
+
 #endif
