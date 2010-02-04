@@ -14,34 +14,4 @@ class ImageType {
    int **pixelValue;
 };
 
-
-//Entered a comment in the test branch..
-
-// Test lol
-
-void testFunction(){
-	cout << "Just testing how function changes the main file.." << endl;
-	cout << "This change i made inside of the master branch..";
-	cout << "I guess changing the master changes the other branch?";
-	cout << "But it doesn't work the other way around?";
-	return;
-}
-
-//Added a comment in the test branch.a
-void testBranchFunction(){
-	cout << "Made this change from inside mattDev branch";
-	cout << "Testing how it affects changes when you",
-	"branch";
-	}
-
-void addedFromMaster(){
-	cout << "This function added in master.";
-	return;
-	}
-
-void addMaster(){
-	cout << "lala";
-	return;
-	}
-
 #endif

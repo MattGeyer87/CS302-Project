@@ -118,7 +118,7 @@ int menu(){
 	cout << "3 - Rotate Image." << endl;
 	cout << "4 - Get a pixel value." << endl;
 	cout << "5 - Set a pixel value." << endl;
-	cout << "10 - Exit the program." << endl;
+	cout << "11 - Exit the program." << endl;
 	cout << endl << "Enter your choice: ";
 	cin >> choice;
 	return choice - 1;
