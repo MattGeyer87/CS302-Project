@@ -153,8 +153,9 @@ void rotateImage( ImageType& source, ImageType& dest, double angle){
 			r = sqrt((double)( x * x + y * y ));
 			if( x == 0 ){
 				if( y == 0 ){
-					source.getPixelVal(j , i, newVal);
-					dest.setPixelVal( j , i, newVal );
+					// center of the image so rotation isn't necessary
+					source.getPixelVal(i , j, newVal);
+					dest.setPixelVal( i , j, newVal );
 				}
 				else if( y > 0 )
 					polarTheta = 0.5 * PI;
