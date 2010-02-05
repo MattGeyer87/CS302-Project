@@ -76,8 +76,10 @@ int main(){
 
 			case ROTATE:
 				// rotate an image by an angle
-				iptr->rotate(120);
-				writeImage( "outie2.pgm" , *iptr );
+				//iptr->rotate(45);
+				//writeImage("pN.pgm" , *iptr);
+				iptr->rotateBilinear(45);
+				writeImage( "pI.pgm" , *iptr );
 
 			case INFO:
 				// INFO logic

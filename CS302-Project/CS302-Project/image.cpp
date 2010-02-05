@@ -163,6 +163,128 @@ void ImageType::rotate( double angle){
 		
 		}
 	}
+	// clear the main array, copy temp to it and black out the temp array
+	clearPV();
 	tempToPV();
+	clearTemp();
 	return;
+}
+
+void ImageType::rotateBilinear( double angle ){
+	// Rotate an image by an angle theta.. bilinear 
+	// interpolation implemented..
+	// Matt
+
+	// cartesian and polar coords
+	double x, y;
+	double r, polarTheta = 0.0;
+	const double PI = 3.1415926535;
+	angle = (angle * PI) / 180;
+
+	// interpolation variables
+	int xU, yU, xL, yL;
+	double tX, tY;
+	double lowerGray, upperGray;
+	int newGray;
+
+	// get image dimensions
+	int height = N, width = M;	
+	
+	clearTemp();
+
+    // loop through all pixels in the destination image
+	for( int i = 0; i < height; i++ ){
+		for( int j = 0; j < width; j++ ){
+
+			// convert from raster to cartesian
+			x = j - width/2;
+			y = height/2 - i;
+
+			// next convert from cartesian to polar so that we can rotate
+			r = sqrt((double)( x * x + y * y ));
+			if( x == 0 ){
+				if( y == 0 ){
+					// center of the image so rotation isn't necessary
+					temp[i][j] = pixelValue[i][j];
+				}
+				else if( y > 0 )
+					polarTheta = 0.5 * PI;
+				
+				else 
+					polarTheta = 1.5 * PI;
+			}
+			else
+				polarTheta = atan2((double)y , (double)x );
+
+			// rotate the pixel
+			polarTheta -= angle;
+
+			// convert back to cartesian
+			x = r * cos( polarTheta );
+			y = r * sin( polarTheta );
+
+			// then back to raster
+			x = x + width/2;
+			y = height/2 - y;
+
+			// calculate lower and upper bounds for both x and y
+			xL = (int)floor( x );
+			yL = (int)floor( y );
+			xU = (int)ceil( x );
+			yU = (int)ceil( y );
+
+			// find the value t for linear interpolation
+			// f(x) = (1 - t)*Po(value) + t*P1(value)
+			// in both x and y directions
+			tX = x - xL;
+			tY = y - yL;		
+
+			// make sure pixels are in bounds
+			if( xL >= 0 && xU >= 0 && xL < width && xU < width &&
+				yL >= 0 && yU >= 0 && yL < height && yU < height){			
+				
+					// interpolate top two pixels on x axis
+					upperGray = (1 - tX ) * pixelValue[yL][xL] + tX * pixelValue[yL][xU];
+					
+					// lower two pixels on x axis
+					lowerGray = (1 - tX) * pixelValue[yL][xU] + tX * pixelValue[yU][xU];
+
+					// interpolate between the two values for the y axis and round to get a valid 
+					// gray value
+					newGray = (int)floor( ((1 - tY) * upperGray + tY * lowerGray) + 0.5);
+
+					// Force pixel to be a proper color 0 - 255
+					if( newGray > 255 )
+						newGray = 255;
+					else if( newGray < 0)
+						newGray = 0;
+
+					// assign the color value to the temp array
+					temp[i][j] = newGray;
+					
+			}
+		
+		}
+	}
+	
+	// clear the main array, copy temp to it and black out the temp array
+	clearPV();
+	tempToPV();
+	clearTemp();
+	return;
+}
+
+void ImageType::shrink(int s){
+	// Shrink an image by a factor s
+
+	// clear the temp array
+	clearTemp();
+
+	// loop through ever pixel of the main array
+	// and add every Sth pixel to the temp array
+	for( int i = 0; i < N; i++){
+		for( int j = 0; j < M; j++ ){
+			//TODO fix this
+		}
+	}
 }

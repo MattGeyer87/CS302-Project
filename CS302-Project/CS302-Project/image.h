@@ -11,6 +11,8 @@ class ImageType {
     void getPixelVal(int, int, int&);
     double getMeanGray();
 	void rotate(double);
+	void rotateBilinear(double);
+	void shrink(int);
  private:
 	void clearTemp();
 	void clearPV();
