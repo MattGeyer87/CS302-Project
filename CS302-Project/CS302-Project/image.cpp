@@ -61,6 +61,11 @@ void ImageType::getPixelVal(int i, int j, int& val)
  val = pixelValue[i][j];
 }
 
+int ImageType::getPixelVal(int i, int j)
+{
+ return  pixelValue[i][j]; 
+}
+
 double ImageType::getMeanGray(){
 	// compute the mean (avg) pixel value of the image
 	// Matt
@@ -276,15 +281,162 @@ void ImageType::rotateBilinear( double angle ){
 
 void ImageType::shrink(int s){
 	// Shrink an image by a factor s
+	// Matt
+
+	int newI = 0,
+		newJ = 0,
+		oldHeight = N,
+		oldWidth = M;
+
+	// obtain new image dimensions
+	N = floor( (double)(N / s ) + 0.5);
+	M = floor( (double)(M / s) + 0.5);
+
+	if( temp ) delete[] temp;
+
+	// allocate new memory for temp
+	temp = new int*[N];
+	for( int i = 0; i < N; i++)
+		temp[i] = new int[M];
 
 	// clear the temp array
 	clearTemp();
 
-	// loop through ever pixel of the main array
-	// and add every Sth pixel to the temp array
+	
+	//add every Sth pixel from the PV to the temp array
 	for( int i = 0; i < N; i++){
 		for( int j = 0; j < M; j++ ){
-			//TODO fix this
+			newI = ((i + 1) * s) - 1;
+			newJ = ((j + 1) * s) - 1;
+
+			temp[i][j] = pixelValue[newI][newJ];
+			
 		}
 	}
+
+	if( pixelValue ) delete[] pixelValue;
+
+	pixelValue = new int*[N];
+	for( int i = 0; i < N; i++)
+		pixelValue[i] = new int[M];
+
+	clearPV();
+	tempToPV();
+	clearTemp();
 }
+
+void ImageType::enlarge( int s ){
+	// Scale an image by a factor s
+	// Matt
+
+	int oldJ = 0,
+		oldI = 0,
+		oldHeight = N,
+		oldWidth = M;
+
+	// De-allocate the temp array
+	if( temp ) delete[] temp;
+
+	// determine new image size
+	M = M * s,
+	N = N * s;
+
+	// Allocate memory for temp with new size
+	temp = new int*[N];
+	for( int i = 0; i < N; i++ ){
+		temp[i] = new int[M];
+	}
+	
+	
+	// Fill it with blank values
+	clearTemp();
+	
+	// loop through and expand
+	for( int i = 0; i < N; i++ ){
+
+		// the i position changes on multiples s
+		if( i % s == 0 && i > 1)
+			oldI++;
+
+		for( int j = 0; j < M; j++ ){
+
+			// the j position we want from the old array changes on multiples of s
+			if( j > 1 && j % s == 0)
+				oldJ++;
+			// construct the new image
+			if( oldJ != oldWidth )
+				temp[i][j] = pixelValue[oldI][oldJ];
+		}
+		
+		// start back at the beginning column to fill the new row
+		oldJ = 0;
+	}
+
+	// de-allocate old image array
+	if( pixelValue ) delete[] pixelValue;
+
+	// Allocate memory for newly sized image
+	pixelValue = new int*[N];
+	for( int i = 0; i < N; i++ ){
+			pixelValue[i] = new int[M];
+	}
+	
+
+	// copy contents of the temp to the new array and erase temp
+	tempToPV();
+	clearTemp();
+
+	return;
+}
+
+ImageType ImageType::operator+( ImageType& rhs ){
+	// add two images together
+	// Matt
+
+	int rhsM, rhsN, rhsQ;
+	rhs.getImageInfo( rhsN, rhsM, rhsQ );
+
+	int nM, nN, nQ, newVal;
+
+	// use the largest of each dimension
+	nM = ( rhsM > M ) ? rhsM : M;
+	nN = ( rhsN > N ) ? rhsN : N;
+	nQ = ( rhsQ > Q ) ? rhsQ : Q;
+
+	// instantiate a image object to be returned
+	ImageType *sum = new ImageType( nN , nM , nQ );
+
+	// loop through and assign values to the new array
+	for( int i = 0; i < nN; i++ ){
+		for( int j = 0; j < nM; j++){
+
+			// check bounds
+			if( i >= N ) sum->setPixelVal( i, j, rhs.getPixelVal( i, j ) );
+			else if( i >= rhsN ) sum->setPixelVal( i , j, pixelValue[i][j]  );
+			else if( j >= M ) sum->setPixelVal( i, j , rhs.getPixelVal( i, j ) );
+			else if( j >= rhsM ) sum->setPixelVal( i, j, pixelValue[i][j]  );
+			else{
+				// Determine new pixel value
+				newVal = floor( (double)( ( rhs.getPixelVal( i , j ) * 0.5 ) + 
+										  ( pixelValue[i][j] * 0.5 ) ) + 0.5 );
+				
+				// store new pixel into the array
+				sum->setPixelVal( i , j , newVal );
+			}
+		}
+	}
+
+	return *sum;
+}
+
+void ImageType::negate(){
+	// negate an image
+	// Matt
+
+	for( int i = 0; i < N; i++ )
+		for( int j = 0; j < M; j++)
+			pixelValue[i][j] = -pixelValue[i][j] + Q;
+}
+
+
+
