@@ -438,5 +438,45 @@ void ImageType::negate(){
 			pixelValue[i][j] = -pixelValue[i][j] + Q;
 }
 
+void ImageType::subImg(int tlx, int tly, int brx, int bry){
+	// get a sub image from the main image
+	// precondition - the values passed are in bounds
+	// matt
+
+	// get dimensions of the subimg
+	N = bry - tly;
+	M = brx - tlx;
+
+	// prepare the temp array
+	if( temp ) delete[] temp;
+
+    temp = new int *[N];
+	for( int i = 0; i < N; i++ )
+		temp[i] = new int[M];
+
+	clearTemp();
+
+	// loop through and fill the temp array
+	for( int i = tly; i < bry; i++ ){
+		for( int j = tlx; j < brx; j++ ){
+			// store values from the source
+			temp[i - tly][j - tlx] = pixelValue[i][j];
+		}
+	}
+
+	// save results to the main array
+	if( pixelValue ) delete[] pixelValue;
+    
+	pixelValue = new int*[N];
+	for( int i = 0; i < N; i++ )
+		pixelValue[i] = new int[M];
+
+	tempToPV();
+	return;
+}
+
+
+	
+
 
 

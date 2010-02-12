@@ -17,6 +17,7 @@ class ImageType {
 	void shrink(int);
 	void enlarge(int);
 	void negate();
+	void subImg(int, int, int, int);
 
  private:
 	void clearTemp();

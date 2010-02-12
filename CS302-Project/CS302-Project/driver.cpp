@@ -17,6 +17,7 @@ int menu();
 int main(){
  
 	int M, N, Q, i, j, newVal;
+	int ulx, uly, brx, bry;
 	bool type;
 	int choice;	
 	char *in, *out;
@@ -27,7 +28,7 @@ int main(){
 
     // Menu constants
 	enum { LOAD, SAVE, ROTATE, INFO, GETVAL, SETVAL, SUBIMG,
-			AVGGL, ENLG, SHRNK, ADD, DIFF, NEG, REFLECT, TRANSLATE, QUIT}; 
+			AVGGL, ENLG, SHRNK, ADD, DIFF, NEG, RFLCT, TRANS, QUIT}; 
 	
 	// load an initial image to be manipulated
 	cout << endl << "Enter the filename of the image you want to load: ";
@@ -114,6 +115,25 @@ int main(){
 
 			case SUBIMG:
 				// subimg logic
+				iptr->getImageInfo( N , M, Q );
+				cout << "Enter the top left x and y coordinates separated by ";
+				cout << "a space: ";
+				cin >> ulx >> uly;
+				while( ulx < 0 || uly < 0 || ulx > M || uly > N ){
+					cout << "Those values are out of bounds.. enter again: ";
+					cin >> ulx >> uly;
+				}
+
+				cout << "Enter the bottom right x and y coordinates separated by ";
+				cout << "a space: ";
+				cin >> brx >> bry;
+				while( brx < 0 || bry < 0 || brx > M || bry > N || bry < uly || brx < ulx){
+					cout << "Those values are out of bounds.. enter again: ";
+					cin >> ulx >> uly;
+				}
+
+				iptr->subImg( ulx, uly, brx, bry );
+				
 				break;
 
 			case AVGGL:
@@ -158,6 +178,14 @@ int main(){
 				// negate an image
 				iptr->negate();
 				writeImage( "negated.pgm" , *iptr );
+				break;
+
+			case RFLCT: 
+				// reflect an image
+				break;
+
+			case TRANS:
+				// translate an img
 				break;
 		
 			default:
