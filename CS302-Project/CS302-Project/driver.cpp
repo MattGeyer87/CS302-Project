@@ -18,6 +18,7 @@ int main(){
  
 	int M, N, Q, i, j, newVal;
 	int ulx, uly, brx, bry;
+	double rot;
 	bool type;
 	int choice;	
 	char *in, *out;
@@ -73,10 +74,9 @@ int main(){
 
 			case ROTATE:
 				// rotate an image by an angle
-				//iptr->rotate(45);
-				//writeImage("pN.pgm" , *iptr);
-				iptr->rotateBilinear(45);
-				writeImage( "pI.pgm" , *iptr );
+				cout << "Enter the degree value to rotate by, expressed as a float: ";
+				cin >> rot;
+				iptr->rotateBilinear(rot);
 				break;
 			
 			case INFO:
@@ -145,14 +145,20 @@ int main(){
 			
 			case ENLG:
 				// enlarge an image by a factor S
-				iptr->enlarge( 5 );
-				writeImage( "enI.pgm" , *iptr );
+				cout << "Enter the positive integer factor by which you'd like to enlarge: ";
+				cin >> i;
+				// make sure it's positive
+				i = ( i > 0 ) ? i : 0;
+				iptr->enlarge( i );
 				break;
 
 			case SHRNK:
 				// shrink an image by a factor s
-				iptr->shrink( 2 );
-				writeImage("shrink.pgm", *iptr);
+				cout << "Enter the positive integer factor by which you'd like to shrink: ";
+				cin >> i;
+				// make sure it's positive
+				i = ( i > 0 ) ? i : 0;
+				iptr->shrink( i );
 
 			case ADD:
 				// add two images together
@@ -168,24 +174,48 @@ int main(){
 				readImage(in, *img);				
 				// I think this might be a memory leak..?
 				*iptr = *iptr + *img;
-				writeImage( "added.pgm" , *iptr );
 				break;
 
 			case DIFF:
 				// compute the difference between two images
+				cout << endl << "Enter the filename of the image you want to subtract: ";
+				cin >> in;
+				readImageHeader( in, N, M, Q, type);
+				if( img ) delete img;
+				img = new ImageType( N, M, Q);
+				readImage(in, *img);
+				*iptr = *iptr - *img;
 
 			case NEG:
 				// negate an image
 				iptr->negate();
-				writeImage( "negated.pgm" , *iptr );
 				break;
 
 			case RFLCT: 
 				// reflect an image
+				cout << endl << "Enter 1 to reflect along the horizon, or 2 to reflect vertically: ";
+				cin >> i;
+				while( i > 2 || i < 0 ){
+					cout << endl << "Not a valid option. Please enter again: ";
+					cin >> i;
+				}
+				if( i == 1 )
+					iptr->reflectH();
+				else
+					iptr->reflectV();
 				break;
 
 			case TRANS:
 				// translate an img
+				iptr->getImageInfo(N , M, Q);
+				cout << endl << "Enter the translation offsets for the x and y separated by a space. ";
+				cout << "Values must be less than " << M << " and " << N << " respectively: ";
+				cin >> j >> i;
+				while( i > N || j > M || i < 0 || j < 0 ){
+					cout << endl << "Those values are out of bounds. Enter again: ";
+					cin >> j >> i;
+				}
+				iptr->translate(j , i );
 				break;
 		
 			default:
@@ -199,7 +229,7 @@ int main(){
 	// Deallocate memory for the image
 	if( iptr ) delete[] iptr;
 	if( img ) delete[] img;
-	cout << endl << endl << "Goodbye!" << endl;
+	cout << endl << endl << "Goodbye!" << endl << endl << endl;
 	system("PAUSE");
 
 	return 0;

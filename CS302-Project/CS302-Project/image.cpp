@@ -429,6 +429,45 @@ ImageType ImageType::operator+( ImageType& rhs ){
 	return *sum;
 }
 
+ImageType ImageType::operator-( ImageType& rhs ){
+	// compute the difference of two images
+	// Matt
+
+	int rhsM, rhsN, rhsQ;
+	rhs.getImageInfo( rhsN, rhsM, rhsQ );
+
+	int nM, nN, nQ, newVal;
+
+	// use the largest of each dimension
+	nM = ( rhsM > M ) ? rhsM : M;
+	nN = ( rhsN > N ) ? rhsN : N;
+	nQ = ( rhsQ > Q ) ? rhsQ : Q;
+
+	// instantiate a image object to be returned
+	ImageType *diff = new ImageType( nN , nM , nQ );
+
+	// loop through and assign values to the new array
+	for( int i = 0; i < nN; i++ ){
+		for( int j = 0; j < nM; j++){
+
+			// check bounds
+			if( i >= N ) diff->setPixelVal( i, j, rhs.getPixelVal( i, j ) );
+			else if( i >= rhsN ) diff->setPixelVal( i , j, pixelValue[i][j]  );
+			else if( j >= M ) diff->setPixelVal( i, j , rhs.getPixelVal( i, j ) );
+			else if( j >= rhsM ) diff->setPixelVal( i, j, pixelValue[i][j]  );
+			else{
+				// Determine new pixel value
+				newVal = abs( pixelValue[i][j] - rhs.getPixelVal(i , j) );
+				
+				// store new pixel into the array
+				diff->setPixelVal( i , j , newVal );
+			}
+		}
+	}
+
+	return *diff;
+}
+
 void ImageType::negate(){
 	// negate an image
 	// Matt
@@ -475,6 +514,57 @@ void ImageType::subImg(int tlx, int tly, int brx, int bry){
 	return;
 }
 
+void ImageType::reflectH(){
+	// reflect an image along the horizon
+	// matt
+	clearTemp();
+
+	for( int i = 0; i < N; i++ )
+		for( int j = 0; j < M; j++ )
+			temp[i][j] = pixelValue[i][M - j - 1];
+
+	tempToPV();
+	return;
+}
+	
+void ImageType::reflectV(){
+	// reflect an image vertically
+	// matt
+	clearTemp();
+
+	for( int i = 0; i < N; i++ )
+		for( int j = 0; j < M; j++ )
+			temp[i][j] = pixelValue[N - i - 1][j];
+
+	tempToPV();
+	return;
+}
+
+void ImageType::translate( int offsetX , int offsetY ){
+	// translate an image in the x and y by the given offsets
+	// precondition - the offsets aren't larger than the original image..
+	// if they aren't then there is no offset in that direction
+
+	int ofx, ofy;
+	// make sure offsets are in bounds
+	ofx = ( offsetX < M ) ? offsetX : 0;
+	ofy = ( offsetY < N ) ? offsetY : 0;
+	
+	// prepare the temp array
+	clearTemp();
+
+	for( int i = 0; i < N; i++){
+		for( int j = 0; j < M; j++ ){
+			// check bounds
+			if( (i + ofy < N) && (j + ofx < M) )
+				// place the values from the source
+				// into offset pixel coords on the temp array
+				temp[i + ofy][j + ofx] = pixelValue[i][j];
+		}
+	}
+	// push changes to the main array
+	tempToPV();
+}
 
 	
 

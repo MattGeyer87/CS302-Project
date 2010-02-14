@@ -6,6 +6,7 @@ class ImageType {
     ImageType();
     ImageType(int, int, int);
 	ImageType operator + (ImageType&);
+	ImageType operator - (ImageType&);
     void getImageInfo(int&, int&, int&);
     void setImageInfo(int, int, int);
     void setPixelVal(int, int, int);
@@ -18,6 +19,9 @@ class ImageType {
 	void enlarge(int);
 	void negate();
 	void subImg(int, int, int, int);
+	void reflectH();
+	void reflectV();
+	void translate(int, int);
 
  private:
 	void clearTemp();
