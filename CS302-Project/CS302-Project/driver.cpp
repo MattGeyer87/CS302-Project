@@ -28,7 +28,7 @@ int main(){
 		      *img = NULL;
 
     // Menu constants
-	enum { LOAD, SAVE, ROTATE, INFO, GETVAL, SETVAL, SUBIMG,
+	enum { LOAD, SAVE, ROTATEB, ROTATE, INFO, GETVAL, SETVAL, SUBIMG,
 			AVGGL, ENLG, SHRNK, ADD, DIFF, NEG, RFLCT, TRANS, QUIT}; 
 	
 	// load an initial image to be manipulated
@@ -72,11 +72,18 @@ int main(){
 				writeImage(out, *iptr);
 				break;
 
+			case ROTATEB:
+				// rotate an image by an angle.. with bilinear interpolation
+				cout << "Enter the degree value to rotate by, expressed as a float: ";
+				cin >> rot;
+				iptr->rotateBilinear(rot);
+				break;
+
 			case ROTATE:
 				// rotate an image by an angle
 				cout << "Enter the degree value to rotate by, expressed as a float: ";
 				cin >> rot;
-				iptr->rotateBilinear(rot);
+				iptr->rotate(rot);
 				break;
 			
 			case INFO:
@@ -129,7 +136,7 @@ int main(){
 				cin >> brx >> bry;
 				while( brx < 0 || bry < 0 || brx > M || bry > N || bry < uly || brx < ulx){
 					cout << "Those values are out of bounds.. enter again: ";
-					cin >> ulx >> uly;
+					cin >> brx >> bry;
 				}
 
 				iptr->subImg( ulx, uly, brx, bry );
@@ -159,6 +166,7 @@ int main(){
 				// make sure it's positive
 				i = ( i > 0 ) ? i : 0;
 				iptr->shrink( i );
+				break;
 
 			case ADD:
 				// add two images together
@@ -172,7 +180,6 @@ int main(){
 				img = new ImageType( N, M, Q);
 				// read image
 				readImage(in, *img);				
-				// I think this might be a memory leak..?
 				*iptr = *iptr + *img;
 				break;
 
@@ -185,6 +192,7 @@ int main(){
 				img = new ImageType( N, M, Q);
 				readImage(in, *img);
 				*iptr = *iptr - *img;
+				break;
 
 			case NEG:
 				// negate an image
@@ -227,8 +235,8 @@ int main(){
 
 	// The user has chosen to end the program
 	// Deallocate memory for the image
-	if( iptr ) delete[] iptr;
-	if( img ) delete[] img;
+	if( iptr ) delete iptr;
+	if( img ) delete img;
 	cout << endl << endl << "Goodbye!" << endl << endl << endl;
 	system("PAUSE");
 
@@ -243,20 +251,21 @@ int menu(){
 	cout << endl << endl;
 	cout << "1 - Load a new image." << endl;
 	cout << "2 - Save image to file." << endl;
-	cout << "3 - Rotate Image." << endl;
-	cout << "4 - Get Image info. " << endl;
-	cout << "5 - Get a pixel value." << endl;
-	cout << "6 - Set a pixel value." << endl;
-	cout << "7 - Get a sub image. " << endl;
-	cout << "8 - See Average Gray Level. " << endl;
-	cout << "9 - Enlarge an image." << endl;
-	cout << "10 - Shrink an image." << endl;
-	cout << "11 - Add two images together. " << endl;
-	cout << "12 - Compute Difference of two Images. " << endl;
-	cout << "13 - Negate an Image." << endl;
-	cout << "14 - Reflect Image." << endl;
-	cout << "15 - Translate Image." << endl;
-	cout << "16 - Exit the program." << endl;
+	cout << "3 - Rotate Image w/ Bilinear Interpolation." << endl;
+	cout << "4 - Rotate an Image." << endl;
+	cout << "5 - Get Image info. " << endl;
+	cout << "6 - Get a pixel value." << endl;
+	cout << "7 - Set a pixel value." << endl;
+	cout << "8 - Get a sub image. " << endl;
+	cout << "9 - See Average Gray Level. " << endl;
+	cout << "10 - Enlarge an image." << endl;
+	cout << "11 - Shrink an image." << endl;
+	cout << "12 - Add two images together. " << endl;
+	cout << "13 - Compute Difference of two Images. " << endl;
+	cout << "14 - Negate an Image." << endl;
+	cout << "15 - Reflect Image." << endl;
+	cout << "16 - Translate Image." << endl;
+	cout << "17 - Exit the program." << endl;
 	cout << endl << "Enter your choice: ";
 	cin >> choice;
 	cout << endl;

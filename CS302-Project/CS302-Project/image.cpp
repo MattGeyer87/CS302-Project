@@ -36,6 +36,28 @@ ImageType::ImageType(int tmpN, int tmpM, int tmpQ)
    }
  }
 }
+/*** Couldn't get this to work in time ******
+ImageType::~ImageType(){
+	// ImageType Destructor
+	// Matt
+	
+	if( pixelValue ){
+		for( int i = 0; i < N; i++ ){
+			delete[] pixelValue[i];
+		}
+		delete[] pixelValue;
+	}
+	
+	if( temp ){
+		for( int i = 0; i < N; i++ ){
+			delete[] temp[i];
+		}
+		delete[] temp;
+	}
+}
+
+********************************************/
+
 
 void ImageType::getImageInfo(int& rows, int& cols, int& levels)
 {
@@ -193,7 +215,7 @@ void ImageType::rotateBilinear( double angle ){
 	int newGray;
 
 	// get image dimensions
-	int height = N, width = M;	
+	int height = N, width = M;
 	
 	clearTemp();
 
@@ -259,10 +281,8 @@ void ImageType::rotateBilinear( double angle ){
 					newGray = (int)floor( ((1 - tY) * upperGray + tY * lowerGray) + 0.5);
 
 					// Force pixel to be a proper color 0 - 255
-					if( newGray > 255 )
-						newGray = 255;
-					else if( newGray < 0)
-						newGray = 0;
+					newGray = ( newGray > 255 ) ? 255 : newGray;
+					newGray = ( newGray < 0 ) ? 0 : newGray;
 
 					// assign the color value to the temp array
 					temp[i][j] = newGray;
@@ -389,6 +409,36 @@ void ImageType::enlarge( int s ){
 	return;
 }
 
+ImageType ImageType::operator = (ImageType& rhs ){
+	// overloaded = operator
+	// Matt
+
+	int rhsN, rhsM, rhsQ;
+	rhs.getImageInfo( rhsN, rhsM, rhsQ );
+
+	if( rhsN != N || rhsM != M || rhsQ != Q ){
+		N = rhsN;
+		M = rhsM;
+		Q = rhsQ;
+
+		pixelValue = new int*[N];
+		temp = new int*[N];
+		for( int i = 0; i < N; i++ ){
+			pixelValue[i] = new int[M];
+			temp[i] = new int[M];
+		}
+		clearTemp();
+		clearPV();
+	}
+
+	for( int i = 0; i < N; i++ )
+		for( int j = 0; j < M; j++ )
+			pixelValue[i][j] = rhs.getPixelVal(i, j);
+	
+	return *this;
+}
+	
+
 ImageType ImageType::operator+( ImageType& rhs ){
 	// add two images together
 	// Matt
@@ -481,6 +531,12 @@ void ImageType::subImg(int tlx, int tly, int brx, int bry){
 	// get a sub image from the main image
 	// precondition - the values passed are in bounds
 	// matt
+
+	// Force coords to be in bounds if the precondition is not met
+	tlx = ( tlx > 0 && tlx < M && tlx <= brx ) ? tlx : 0;
+	tly = ( tly > 0 && tly < N && tly <= bry ) ? tly : 0;
+	brx = ( brx > 0 && brx < M && brx >= tlx ) ? brx : (M - 1);
+	bry = ( bry > 0 && bry < N && bry >= tly ) ? bry : (N - 1);
 
 	// get dimensions of the subimg
 	N = bry - tly;

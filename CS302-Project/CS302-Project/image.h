@@ -5,8 +5,10 @@ class ImageType {
  public:
     ImageType();
     ImageType(int, int, int);
+	//~ImageType();
 	ImageType operator + (ImageType&);
 	ImageType operator - (ImageType&);
+	ImageType operator = (ImageType&);
     void getImageInfo(int&, int&, int&);
     void setImageInfo(int, int, int);
     void setPixelVal(int, int, int);
