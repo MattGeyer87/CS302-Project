@@ -308,11 +308,15 @@ void ImageType::shrink(int s){
 		oldHeight = N,
 		oldWidth = M;
 
+	if( temp ){
+		for( int i = 0; i < N; i++ )
+			delete[] temp[i];
+		delete[] temp;
+	}
+
 	// obtain new image dimensions
 	N = floor( (double)(N / s ) + 0.5);
 	M = floor( (double)(M / s) + 0.5);
-
-	if( temp ) delete[] temp;
 
 	// allocate new memory for temp
 	temp = new int*[N];
@@ -334,7 +338,11 @@ void ImageType::shrink(int s){
 		}
 	}
 
-	if( pixelValue ) delete[] pixelValue;
+	if( pixelValue ){
+		for( int i = 0; i < oldHeight; i++ )
+			delete[] pixelValue[i];
+		delete[] pixelValue;
+	}
 
 	pixelValue = new int*[N];
 	for( int i = 0; i < N; i++)
@@ -355,8 +363,12 @@ void ImageType::enlarge( int s ){
 		oldWidth = M;
 
 	// De-allocate the temp array
-	if( temp ) delete[] temp;
-
+	
+	if( temp ){
+		for( int i = 0; i < N; i++ )
+			delete[] temp[i];
+		delete[] temp;
+	}
 	// determine new image size
 	M = M * s,
 	N = N * s;
@@ -393,7 +405,11 @@ void ImageType::enlarge( int s ){
 	}
 
 	// de-allocate old image array
-	if( pixelValue ) delete[] pixelValue;
+	if( pixelValue ){
+		for( int i = 0; i < oldHeight; i++ )
+			delete[] pixelValue[i];
+		delete[] pixelValue;
+	}
 
 	// Allocate memory for newly sized image
 	pixelValue = new int*[N];
@@ -420,6 +436,18 @@ ImageType ImageType::operator = (ImageType& rhs ){
 		N = rhsN;
 		M = rhsM;
 		Q = rhsQ;
+
+		if( pixelValue ){
+		for( int i = 0; i < N; i++ )
+			delete[] pixelValue[i];
+		delete[] pixelValue;
+		}
+
+		if( temp ){
+		for( int i = 0; i < N; i++ )
+			delete[] temp[i];
+		delete[] temp;
+		}
 
 		pixelValue = new int*[N];
 		temp = new int*[N];
@@ -532,6 +560,15 @@ void ImageType::subImg(int tlx, int tly, int brx, int bry){
 	// precondition - the values passed are in bounds
 	// matt
 
+	int oldN = N, oldM = M;
+
+	// prepare the temp array
+	if( temp ){
+		for( int i = 0; i < N; i++ )
+			delete[] temp[i];
+		delete[] temp;
+	}
+
 	// Force coords to be in bounds if the precondition is not met
 	tlx = ( tlx > 0 && tlx < M && tlx <= brx ) ? tlx : 0;
 	tly = ( tly > 0 && tly < N && tly <= bry ) ? tly : 0;
@@ -541,9 +578,6 @@ void ImageType::subImg(int tlx, int tly, int brx, int bry){
 	// get dimensions of the subimg
 	N = bry - tly;
 	M = brx - tlx;
-
-	// prepare the temp array
-	if( temp ) delete[] temp;
 
     temp = new int *[N];
 	for( int i = 0; i < N; i++ )
@@ -560,7 +594,11 @@ void ImageType::subImg(int tlx, int tly, int brx, int bry){
 	}
 
 	// save results to the main array
-	if( pixelValue ) delete[] pixelValue;
+	if( pixelValue ){
+		for( int i = 0; i < oldN; i++ )
+			delete[] pixelValue[i];
+		delete[] pixelValue;
+	}
     
 	pixelValue = new int*[N];
 	for( int i = 0; i < N; i++ )
