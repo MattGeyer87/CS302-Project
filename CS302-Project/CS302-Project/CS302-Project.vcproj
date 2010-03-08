@@ -191,6 +191,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\RGB.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\WriteImage.cpp"
 				>
 			</File>
@@ -202,6 +206,10 @@
 			>
 			<File
 				RelativePath=".\image.h"
+				>
+			</File>
+			<File
+				RelativePath=".\RGB.h"
 				>
 			</File>
 		</Filter>

@@ -5,12 +5,20 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "image.h"
+#include "RGB.h"
+
+
 
 using namespace std;
 
 void readImageHeader(char[], int&, int&, int&, bool&);
-void readImage(char[], ImageType&);
-void writeImage(char[], ImageType&);
+void readImage(char[], ImageType<int>&);
+void writeImage(char[], ImageType<int>&);
+void readImage(char[], ImageType<RGB>&);
+void writeImage(char[], ImageType<RGB>&);
+RGB abs( RGB );
+RGB floor( RGB );
+
 int menu();
 
 
@@ -24,7 +32,7 @@ int main(){
 	char *in, *out;
 	in = new char[256];
 	out = new char[256];
-    ImageType *iptr = NULL,
+    ImageType<RGB> *iptr = NULL,
 		      *img = NULL;
 
     // Menu constants
@@ -39,14 +47,14 @@ int main(){
 	readImageHeader(in, N, M, Q, type);
 
 	// allocate memory for the image array
-	iptr = new ImageType( N, M, Q );
+	iptr = new ImageType<RGB>( N, M, Q );
 
 	// read image
 	readImage(in, *iptr);
 
 	// Show user the menu
 	choice = menu();
-
+	
 	// Main program loop.. Goes until the user chooses to quit
 	while( choice != QUIT ){
 		switch(choice){
@@ -60,7 +68,7 @@ int main(){
 				// de-allocate memory from old image
 				if( iptr ) delete iptr;
 				// allocate memory for the image array
-				iptr = new ImageType(N, M, Q);
+				iptr = new ImageType<RGB>(N, M, Q);
 				// read image
 				readImage(in, *iptr);
 				break;
@@ -71,13 +79,15 @@ int main(){
 				cin >> out;
 				writeImage(out, *iptr);
 				break;
-
+		
+				
 			case ROTATEB:
 				// rotate an image by an angle.. with bilinear interpolation
 				cout << "Enter the degree value to rotate by, expressed as a float: ";
 				cin >> rot;
 				iptr->rotateBilinear(rot);
 				break;
+			
 
 			case ROTATE:
 				// rotate an image by an angle
@@ -85,6 +95,7 @@ int main(){
 				cin >> rot;
 				iptr->rotate(rot);
 				break;
+			
 			
 			case INFO:
 				// INFO logic
@@ -104,7 +115,7 @@ int main(){
 				j = ( j < M && j >= 0 ) ? j : 0;
 				cout << "The value at that pixel is: " << iptr->getPixelVal( i , j ) << endl;
 				break;
-
+		
 			case SETVAL:
 				// Set the value of a particular pixel
 				iptr->getImageInfo( N , M , Q );
@@ -119,7 +130,7 @@ int main(){
 				// set new pixel value
 				iptr->setPixelVal( i , j, newVal );
 				break;
-
+			
 			case SUBIMG:
 				// subimg logic
 				iptr->getImageInfo( N , M, Q );
@@ -146,9 +157,9 @@ int main(){
 			case AVGGL:
 				// Print average gray level
 				cout << endl << "The average gray level for your image is: ";
-				cout << iptr->getMeanGray() << endl;
+				cout << iptr->meanValue() << endl;
 				break;
-
+				
 			
 			case ENLG:
 				// enlarge an image by a factor S
@@ -158,7 +169,7 @@ int main(){
 				i = ( i > 0 ) ? i : 0;
 				iptr->enlarge( i );
 				break;
-
+			
 			case SHRNK:
 				// shrink an image by a factor s
 				cout << "Enter the positive integer factor by which you'd like to shrink: ";
@@ -167,7 +178,7 @@ int main(){
 				i = ( i > 0 ) ? i : 0;
 				iptr->shrink( i );
 				break;
-
+			
 			case ADD:
 				// add two images together
 				// load an image to add
@@ -177,23 +188,24 @@ int main(){
 				readImageHeader(in, N, M, Q, type);
 				// allocate memory for the image array
 				if( img ) delete img;
-				img = new ImageType( N, M, Q);
+				img = new ImageType<RGB>( N, M, Q);
 				// read image
 				readImage(in, *img);				
 				*iptr = *iptr + *img;
 				break;
 
+			
 			case DIFF:
 				// compute the difference between two images
 				cout << endl << "Enter the filename of the image you want to subtract: ";
 				cin >> in;
 				readImageHeader( in, N, M, Q, type);
 				if( img ) delete img;
-				img = new ImageType( N, M, Q);
+				img = new ImageType<RGB>( N, M, Q);
 				readImage(in, *img);
 				*iptr = *iptr - *img;
 				break;
-
+	
 			case NEG:
 				// negate an image
 				iptr->negate();
@@ -225,6 +237,8 @@ int main(){
 				}
 				iptr->translate(j , i );
 				break;
+
+		
 		
 			default:
 				cout << "That is not a valid choice!" << endl; 
@@ -272,5 +286,32 @@ int menu(){
 	return choice - 1;
 }// END MENU
 
+RGB abs( RGB pixel ){
+	// overloaded abs function
+	int rd, gr, bl;
+	pixel.getRGB( rd, gr, bl );
+	
+	rd = abs(rd);
+	bl = abs(bl);
+	gr = abs(gr);
+
+	pixel.setRGB( rd, gr, bl );
+
+	return pixel;
+}
+
+RGB floor( RGB pixel ){
+	// overloaded floor function
+	int rd, gr, bl;
+	pixel.getRGB( rd, gr, bl );
+
+	rd = (int)floor( (double) rd );
+	bl = (int)floor( (double) bl );
+	gr = (int)floor( (double) gr );
+	
+	pixel.setRGB( rd, gr, bl );
+
+	return pixel;
+}
 
 

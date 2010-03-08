@@ -2,12 +2,14 @@
 #include <stdio.h>
 #include <iostream>
 #include <math.h>
+#include "RGB.h"
 
 using namespace std;
 
-#include "image.h"
+#ifdef IMAGE_H
 
-ImageType::ImageType()
+template<class PT>
+ImageType<PT>::ImageType()
 {
  N = 0;
  M = 0;
@@ -17,7 +19,8 @@ ImageType::ImageType()
  temp = NULL;
 }
 
-ImageType::ImageType(int tmpN, int tmpM, int tmpQ)
+template<class PT>
+ImageType<PT>::ImageType(int tmpN, int tmpM, int tmpQ)
 {
  int i, j;
 
@@ -25,75 +28,73 @@ ImageType::ImageType(int tmpN, int tmpM, int tmpQ)
  M = tmpM;
  Q = tmpQ;
 
- pixelValue = new int* [N];
- temp = new int* [N];
+ pixelValue = new PT* [N];
+ temp = new PT* [N];
  for(i=0; i<N; i++) {
-   pixelValue[i] = new int[M];
-   temp[i] = new int[M];
+   pixelValue[i] = new PT[M];
+   temp[i] = new PT[M];
    for(j=0; j<M; j++){
      pixelValue[i][j] = 0;
 	 temp[i][j] = 0;
    }
  }
 }
-/*** Couldn't get this to work in time ******
-ImageType::~ImageType(){
+
+template<class PT>
+ImageType<PT>::~ImageType(){
 	// ImageType Destructor
 	// Matt
-	
-	if( pixelValue ){
-		for( int i = 0; i < N; i++ ){
-			delete[] pixelValue[i];
-		}
-		delete[] pixelValue;
+		
+	for( int i = 0; i < N; i++ ){
+		delete[] pixelValue[i];
+		delete[] temp[i];
 	}
-	
-	if( temp ){
-		for( int i = 0; i < N; i++ ){
-			delete[] temp[i];
-		}
-		delete[] temp;
-	}
+	delete[] pixelValue;
+	delete[] temp;
 }
 
-********************************************/
 
-
-void ImageType::getImageInfo(int& rows, int& cols, int& levels)
+template<class PT>
+void ImageType<PT>::getImageInfo(int& rows, int& cols, int& levels)
 {
  rows = N;
  cols = M;
  levels = Q;
 } 
 
-void ImageType::setImageInfo(int rows, int cols, int levels)
+template<class PT>
+void ImageType<PT>::setImageInfo(int rows, int cols, int levels)
 {
  N= rows;
  M= cols;
  Q= levels;
 } 
 
-void ImageType::setPixelVal(int i, int j, int val)
+template<class PT>
+void ImageType<PT>::setPixelVal(int i, int j, PT val)
 {
  pixelValue[i][j] = val;
 }
 
-void ImageType::getPixelVal(int i, int j, int& val)
+template<class PT>
+void ImageType<PT>::getPixelVal(int i, int j, PT& val)
 {
  val = pixelValue[i][j];
 }
 
-int ImageType::getPixelVal(int i, int j)
+template<class PT>
+PT ImageType<PT>::getPixelVal(int i, int j)
 {
  return  pixelValue[i][j]; 
 }
 
-double ImageType::getMeanGray(){
+template<class PT>
+PT ImageType<PT>::meanValue(){
 	// compute the mean (avg) pixel value of the image
 	// Matt
 
 	int numPixels = N * M;
-	int totalGray = 0;
+	PT totalGray = 0;
 	
 	// loop through all pixels
 	for( int i = 0; i < N; i++)
@@ -104,7 +105,8 @@ double ImageType::getMeanGray(){
 	return(totalGray / numPixels );
 }
 
-void ImageType::clearTemp(){
+template<class PT>
+void ImageType<PT>::clearTemp(){
 	// set all the values in the temp array to black
 	// Matt
 
@@ -113,7 +115,8 @@ void ImageType::clearTemp(){
 			temp[i][j] = 0;
 }
 
-void ImageType::clearPV(){
+template<class PT>
+void ImageType<PT>::clearPV(){
 	// set all the values in the pixel array to black
 	// Matt
 
@@ -121,8 +124,8 @@ void ImageType::clearPV(){
 		for( int j = 0; j < M; j++)
 			pixelValue[i][j] = 0;
 }
-
-void ImageType::tempToPV(){
+template<class PT>
+void ImageType<PT>::tempToPV(){
 	// store all the values in the temp array to the
 	// pixelValue (main) array
 	// Matt
@@ -132,8 +135,8 @@ void ImageType::tempToPV(){
 			pixelValue[i][j] = temp[i][j];
 }
 
-
-void ImageType::rotate( double angle){
+template<class PT>
+void ImageType<PT>::rotate( double angle){
 	// Rotate an image by an angle theta..
 	// Matt
 
@@ -197,7 +200,8 @@ void ImageType::rotate( double angle){
 	return;
 }
 
-void ImageType::rotateBilinear( double angle ){
+template<class PT>
+void ImageType<PT>::rotateBilinear( double angle ){
 	// Rotate an image by an angle theta.. bilinear 
 	// interpolation implemented..
 	// Matt
@@ -211,8 +215,7 @@ void ImageType::rotateBilinear( double angle ){
 	// interpolation variables
 	int xU, yU, xL, yL;
 	double tX, tY;
-	double lowerGray, upperGray;
-	int newGray;
+	PT lowerGray, upperGray, newGray;
 
 	// get image dimensions
 	int height = N, width = M;
@@ -271,18 +274,18 @@ void ImageType::rotateBilinear( double angle ){
 				yL >= 0 && yU >= 0 && yL < height && yU < height){			
 				
 					// interpolate top two pixels on x axis
-					upperGray = (1 - tX ) * pixelValue[yL][xL] + tX * pixelValue[yL][xU];
+					upperGray = pixelValue[yL][xL] * (1 - tX) + pixelValue[yL][xU] * tX;
 					
 					// lower two pixels on x axis
-					lowerGray = (1 - tX) * pixelValue[yL][xU] + tX * pixelValue[yU][xU];
+					lowerGray = pixelValue[yL][xU] * (1 - tX) + pixelValue[yU][xU] * tX;
 
 					// interpolate between the two values for the y axis and round to get a valid 
 					// gray value
-					newGray = (int)floor( ((1 - tY) * upperGray + tY * lowerGray) + 0.5);
+					newGray = floor( (upperGray * (1 - tY) + lowerGray * tY) + 0.5);
 
 					// Force pixel to be a proper color 0 - 255
-					newGray = ( newGray > 255 ) ? 255 : newGray;
-					newGray = ( newGray < 0 ) ? 0 : newGray;
+					//newGray = ( newGray > 255 ) ? 255 : newGray;
+					//newGray = ( newGray < 0 ) ? 0 : newGray;
 
 					// assign the color value to the temp array
 					temp[i][j] = newGray;
@@ -299,7 +302,10 @@ void ImageType::rotateBilinear( double angle ){
 	return;
 }
 
-void ImageType::shrink(int s){
+
+
+template <class PT>
+void ImageType<PT>::shrink(int s){
 	// Shrink an image by a factor s
 	// Matt
 
@@ -315,13 +321,13 @@ void ImageType::shrink(int s){
 	}
 
 	// obtain new image dimensions
-	N = floor( (double)(N / s ) + 0.5);
-	M = floor( (double)(M / s) + 0.5);
+	N = (int)floor( (double)(N / s ) + 0.5);
+	M = (int)floor( (double)(M / s) + 0.5);
 
 	// allocate new memory for temp
-	temp = new int*[N];
+	temp = new PT*[N];
 	for( int i = 0; i < N; i++)
-		temp[i] = new int[M];
+		temp[i] = new PT[M];
 
 	// clear the temp array
 	clearTemp();
@@ -344,16 +350,18 @@ void ImageType::shrink(int s){
 		delete[] pixelValue;
 	}
 
-	pixelValue = new int*[N];
+	pixelValue = new PT*[N];
 	for( int i = 0; i < N; i++)
-		pixelValue[i] = new int[M];
+		pixelValue[i] = new PT[M];
 
 	clearPV();
 	tempToPV();
 	clearTemp();
 }
 
-void ImageType::enlarge( int s ){
+
+template<class PT>
+void ImageType<PT>::enlarge( int s ){
 	// Scale an image by a factor s
 	// Matt
 
@@ -374,9 +382,9 @@ void ImageType::enlarge( int s ){
 	N = N * s;
 
 	// Allocate memory for temp with new size
-	temp = new int*[N];
+	temp = new PT*[N];
 	for( int i = 0; i < N; i++ ){
-		temp[i] = new int[M];
+		temp[i] = new PT[M];
 	}
 	
 	
@@ -412,9 +420,9 @@ void ImageType::enlarge( int s ){
 	}
 
 	// Allocate memory for newly sized image
-	pixelValue = new int*[N];
+	pixelValue = new PT*[N];
 	for( int i = 0; i < N; i++ ){
-			pixelValue[i] = new int[M];
+			pixelValue[i] = new PT[M];
 	}
 	
 
@@ -425,56 +433,60 @@ void ImageType::enlarge( int s ){
 	return;
 }
 
-ImageType ImageType::operator = (ImageType& rhs ){
+
+template<class PT>
+ImageType<PT>& ImageType<PT>::operator = (ImageType<PT>& rhs ){
 	// overloaded = operator
 	// Matt
+	
+		int rhsN, rhsM, rhsQ;
+		rhs.getImageInfo( rhsN, rhsM, rhsQ );
 
-	int rhsN, rhsM, rhsQ;
-	rhs.getImageInfo( rhsN, rhsM, rhsQ );
+		if( rhsN != N || rhsM != M || rhsQ != Q ){
+			N = rhsN;
+			M = rhsM;
+			Q = rhsQ;
 
-	if( rhsN != N || rhsM != M || rhsQ != Q ){
-		N = rhsN;
-		M = rhsM;
-		Q = rhsQ;
+			if( pixelValue ){
+			for( int i = 0; i < N; i++ )
+				delete[] pixelValue[i];
+			delete[] pixelValue;
+			}
 
-		if( pixelValue ){
+			if( temp ){
+			for( int i = 0; i < N; i++ )
+				delete[] temp[i];
+			delete[] temp;
+			}
+
+			pixelValue = new PT*[N];
+			temp = new PT*[N];
+			for( int i = 0; i < N; i++ ){
+				pixelValue[i] = new PT[M];
+				temp[i] = new PT[M];
+			}
+			clearTemp();
+			clearPV();
+		}
+
 		for( int i = 0; i < N; i++ )
-			delete[] pixelValue[i];
-		delete[] pixelValue;
-		}
-
-		if( temp ){
-		for( int i = 0; i < N; i++ )
-			delete[] temp[i];
-		delete[] temp;
-		}
-
-		pixelValue = new int*[N];
-		temp = new int*[N];
-		for( int i = 0; i < N; i++ ){
-			pixelValue[i] = new int[M];
-			temp[i] = new int[M];
-		}
-		clearTemp();
-		clearPV();
-	}
-
-	for( int i = 0; i < N; i++ )
-		for( int j = 0; j < M; j++ )
-			pixelValue[i][j] = rhs.getPixelVal(i, j);
+			for( int j = 0; j < M; j++ )
+				pixelValue[i][j] = rhs.getPixelVal(i, j);
 	
 	return *this;
+
 }
 	
-
-ImageType ImageType::operator+( ImageType& rhs ){
+template<class PT>
+ImageType<PT>& ImageType<PT>::operator + ( ImageType<PT>& rhs ){
 	// add two images together
 	// Matt
 
 	int rhsM, rhsN, rhsQ;
 	rhs.getImageInfo( rhsN, rhsM, rhsQ );
 
-	int nM, nN, nQ, newVal;
+	int nM, nN, nQ;
+	PT newVal;
 
 	// use the largest of each dimension
 	nM = ( rhsM > M ) ? rhsM : M;
@@ -482,7 +494,7 @@ ImageType ImageType::operator+( ImageType& rhs ){
 	nQ = ( rhsQ > Q ) ? rhsQ : Q;
 
 	// instantiate a image object to be returned
-	ImageType *sum = new ImageType( nN , nM , nQ );
+	ImageType *sum = new ImageType<PT>( nN , nM , nQ );
 
 	// loop through and assign values to the new array
 	for( int i = 0; i < nN; i++ ){
@@ -495,8 +507,8 @@ ImageType ImageType::operator+( ImageType& rhs ){
 			else if( j >= rhsM ) sum->setPixelVal( i, j, pixelValue[i][j]  );
 			else{
 				// Determine new pixel value
-				newVal = floor( (double)( ( rhs.getPixelVal( i , j ) * 0.5 ) + 
-										  ( pixelValue[i][j] * 0.5 ) ) + 0.5 );
+				newVal = floor( ( ( rhs.getPixelVal( i , j ) * 0.5 ) + ( pixelValue[i][j] * 0.5 ) ) + 0.5 );
+				//newVal = (pixelValue[i][j] * 0.5) * 0.5;
 				
 				// store new pixel into the array
 				sum->setPixelVal( i , j , newVal );
@@ -507,14 +519,17 @@ ImageType ImageType::operator+( ImageType& rhs ){
 	return *sum;
 }
 
-ImageType ImageType::operator-( ImageType& rhs ){
+
+template<class PT>
+ImageType<PT>& ImageType<PT>::operator-( ImageType<PT>& rhs ){
 	// compute the difference of two images
 	// Matt
 
 	int rhsM, rhsN, rhsQ;
 	rhs.getImageInfo( rhsN, rhsM, rhsQ );
 
-	int nM, nN, nQ, newVal;
+	int nM, nN, nQ;
+	PT newVal;
 
 	// use the largest of each dimension
 	nM = ( rhsM > M ) ? rhsM : M;
@@ -522,7 +537,7 @@ ImageType ImageType::operator-( ImageType& rhs ){
 	nQ = ( rhsQ > Q ) ? rhsQ : Q;
 
 	// instantiate a image object to be returned
-	ImageType *diff = new ImageType( nN , nM , nQ );
+	ImageType *diff = new ImageType<PT>( nN , nM , nQ );
 
 	// loop through and assign values to the new array
 	for( int i = 0; i < nN; i++ ){
@@ -546,16 +561,19 @@ ImageType ImageType::operator-( ImageType& rhs ){
 	return *diff;
 }
 
-void ImageType::negate(){
+
+template<class PT>
+void ImageType<PT>::negate(){
 	// negate an image
 	// Matt
 
 	for( int i = 0; i < N; i++ )
 		for( int j = 0; j < M; j++)
-			pixelValue[i][j] = -pixelValue[i][j] + Q;
+			pixelValue[i][j] = (pixelValue[i][j] * -1 ) + Q;
 }
 
-void ImageType::subImg(int tlx, int tly, int brx, int bry){
+template<class PT>
+void ImageType<PT>::subImg(int tlx, int tly, int brx, int bry){
 	// get a sub image from the main image
 	// precondition - the values passed are in bounds
 	// matt
@@ -579,9 +597,9 @@ void ImageType::subImg(int tlx, int tly, int brx, int bry){
 	N = bry - tly;
 	M = brx - tlx;
 
-    temp = new int *[N];
+    temp = new PT *[N];
 	for( int i = 0; i < N; i++ )
-		temp[i] = new int[M];
+		temp[i] = new PT[M];
 
 	clearTemp();
 
@@ -600,15 +618,16 @@ void ImageType::subImg(int tlx, int tly, int brx, int bry){
 		delete[] pixelValue;
 	}
     
-	pixelValue = new int*[N];
+	pixelValue = new PT*[N];
 	for( int i = 0; i < N; i++ )
-		pixelValue[i] = new int[M];
+		pixelValue[i] = new PT[M];
 
 	tempToPV();
 	return;
 }
 
-void ImageType::reflectH(){
+template<class PT>
+void ImageType<PT>::reflectH(){
 	// reflect an image along the horizon
 	// matt
 	clearTemp();
@@ -620,8 +639,9 @@ void ImageType::reflectH(){
 	tempToPV();
 	return;
 }
-	
-void ImageType::reflectV(){
+
+template<class PT>
+void ImageType<PT>::reflectV(){
 	// reflect an image vertically
 	// matt
 	clearTemp();
@@ -634,7 +654,8 @@ void ImageType::reflectV(){
 	return;
 }
 
-void ImageType::translate( int offsetX , int offsetY ){
+template<class PT>
+void ImageType<PT>::translate( int offsetX , int offsetY ){
 	// translate an image in the x and y by the given offsets
 	// precondition - the offsets aren't larger than the original image..
 	// if they aren't then there is no offset in that direction
@@ -662,5 +683,5 @@ void ImageType::translate( int offsetX , int offsetY ){
 
 	
 
-
+#endif
 

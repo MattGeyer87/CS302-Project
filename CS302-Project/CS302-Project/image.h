@@ -1,20 +1,21 @@
 #ifndef IMAGE_H
 #define IMAGE_H
 
+template<class PT>
 class ImageType {
  public:
     ImageType();
     ImageType(int, int, int);
-	//~ImageType();
-	ImageType operator + (ImageType&);
-	ImageType operator - (ImageType&);
-	ImageType operator = (ImageType&);
+	~ImageType();
+	ImageType<PT>& operator + (ImageType<PT>&);
+	ImageType<PT>& operator - (ImageType<PT>&);
+	ImageType<PT>& operator = (ImageType<PT>&);
     void getImageInfo(int&, int&, int&);
     void setImageInfo(int, int, int);
-    void setPixelVal(int, int, int);
-    void getPixelVal(int, int, int&);
-	int getPixelVal(int, int);
-    double getMeanGray();
+    void setPixelVal(int, int, PT);
+    void getPixelVal(int, int, PT&);
+	PT getPixelVal(int, int);
+    PT meanValue();
 	void rotate(double);
 	void rotateBilinear(double);
 	void shrink(int);
@@ -30,8 +31,10 @@ class ImageType {
 	void clearPV();
 	void tempToPV();
 	int N, M, Q;
-	int **pixelValue;
-	int **temp;
+	PT **pixelValue;
+	PT **temp;
 };
+
+#include "image.cpp"
 
 #endif

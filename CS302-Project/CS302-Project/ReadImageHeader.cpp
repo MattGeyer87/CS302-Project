@@ -9,8 +9,6 @@ using namespace std;
 
 void readImageHeader(char fname[], int& N, int& M, int& Q, bool& type)
 {
- //int i, j;
- //unsigned char *charImage;
  char header [100], *ptr;
  ifstream ifp;
 
@@ -51,5 +49,4 @@ ifp.getline(header,100,'\n');
  Q=strtol(header,&ptr,0);
 
  ifp.close();
-
 }
