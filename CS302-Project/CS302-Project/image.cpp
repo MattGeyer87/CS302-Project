@@ -681,6 +681,65 @@ void ImageType<PT>::translate( int offsetX , int offsetY ){
 	tempToPV();
 }
 
+template<class PT>
+void ImageType<PT>::threshold( int t ){
+	// Threshold an image
+
+	// Fix later to be efficient
+	PT *objectPixels = new PT[N * M];
+	PT *bgPixels = new PT[N * M];
+    PT objAvg = 0, bgAvg = 0, objSum = 0, bgSum = 0;
+	int thresh = t,
+		prevThresh = 0;
+    int k = 0,
+		l = 0;
+
+	while( thresh != prevThresh ){
+		for( int i = 0; i < N; i++ ){
+			for( int j = 0; j < M; j++ ){
+				if( pixelValue[i][j] > thresh ){
+					objectPixels[k] = pixelValue[i][j];
+					k++;
+				}
+				else{
+					bgPixels[l] = pixelValue[i][j];
+					l++;
+				}
+			}
+		}
+		prevThresh = thresh;
+
+		// find average value of pixel in each set
+		for( int i = 0; i < k; i++ )
+			objSum += objectPixels[i];
+
+		for( int i = 0; i < l; i++)
+			bgSum += bgPixels[i];
+
+		objAvg = objSum / k;
+		bgAvg = bgSum / l;
+
+		// new threshold 
+		thresh = (objAvg + bgAvg) / 2;
+
+		// reset values
+		k = 0;
+		l = 0;
+		objSum = 0;
+		bgSum = 0;
+		objAvg = 0;
+		bgAvg = 0;
+
+	}
+
+	cout << thresh << " " << prevThresh << " " << t;
+}
+		
+		
+
+
+    
+
 	
 
 #endif

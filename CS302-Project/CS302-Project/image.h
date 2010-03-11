@@ -25,6 +25,7 @@ class ImageType {
 	void reflectH();
 	void reflectV();
 	void translate(int, int);
+	void threshold(int);
 
  private:
 	void clearTemp();

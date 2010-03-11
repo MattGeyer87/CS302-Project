@@ -27,30 +27,81 @@ int main(){
 	int M, N, Q, i, j, newVal;
 	int ulx, uly, brx, bry;
 	double rot;
-	bool type;
+	bool type, demo;
 	int choice;	
-	char *in, *out;
+	char *c_in, *g_in, *c_img_in, *g_img_in, *out, *in;
 	in = new char[256];
+	c_in = new char[256];
 	out = new char[256];
-    ImageType<RGB> *iptr = NULL,
-		      *img = NULL;
+    c_img_in = new char[256];
+	g_in = new char[256];
+	g_img_in = new char[256];
+    ImageType<RGB> *c_iptr = NULL,
+		           *c_img = NULL;
+				   //*iptr = NULL,
+				   //*img = NULL;
+	ImageType<int> *g_iptr = NULL,
+		           *g_img = NULL,
+				   *iptr = NULL,
+				   *img = NULL;
 
-    // Menu constants
+	// Menu constants
 	enum { LOAD, SAVE, ROTATEB, ROTATE, INFO, GETVAL, SETVAL, SUBIMG,
 			AVGGL, ENLG, SHRNK, ADD, DIFF, NEG, RFLCT, TRANS, QUIT}; 
-	
-	// load an initial image to be manipulated
-	cout << endl << "Enter the filename of the image you want to load: ";
-	cin >> in;
 
-	// read image header
-	readImageHeader(in, N, M, Q, type);
+	cout << "Would you like to run in Demo mode? Enter 1 - yes , 2 - no: ";
+	cin >> choice;
 
-	// allocate memory for the image array
-	iptr = new ImageType<RGB>( N, M, Q );
+	if( choice == 1 )
+		demo = true;
+	else
+		demo = false;
 
-	// read image
-	readImage(in, *iptr);
+	if( demo ){
+		// load an initial image to be manipulated
+		cout << endl << "Enter the filename of the first color image you want to load: ";
+		cin >> c_in;
+
+		// read image header
+		readImageHeader(c_in, N, M, Q, type);
+
+		// allocate memory for the image array
+		c_iptr = new ImageType<RGB>( N, M, Q );
+
+		// read image
+		readImage(c_in, *c_iptr);
+
+		cout << endl << "Enter the filename of the second color image you want to load: ";
+		cin >> c_img_in;
+		readImageHeader(c_img_in, N, M, Q, type);
+		c_img = new ImageType<RGB>( N, M, Q );
+		readImage(c_img_in, *c_img);
+
+		// again for the grayscale image
+		cout << endl << "Enter the filename of the first grayscale image you want to load: ";
+		cin >> g_in;
+		readImageHeader(g_in, N, M, Q, type);
+		g_iptr = new ImageType<int>( N, M, Q );
+		readImage(g_in, *g_iptr);
+
+		cout << endl << "Enter the filename of the second grayscale image you want to load: ";
+		cin >> g_img_in;
+		readImageHeader(g_img_in, N, M, Q, type);
+		g_img = new ImageType<int>( N, M, Q );
+		readImage(g_img_in, *g_img);
+	}
+	else{
+		cout << endl << "Enter the filename of the image you want to load: ";
+		cin >> in;
+		// read image header
+		readImageHeader(in, N, M, Q, type);
+		// de-allocate memory from old image
+		if( iptr ) delete iptr;
+		// allocate memory for the image array
+		iptr = new ImageType<int>(N, M, Q);
+		// read image
+		readImage(in, *iptr);
+	}
 
 	// Show user the menu
 	choice = menu();
@@ -68,9 +119,10 @@ int main(){
 				// de-allocate memory from old image
 				if( iptr ) delete iptr;
 				// allocate memory for the image array
-				iptr = new ImageType<RGB>(N, M, Q);
+				iptr = new ImageType<int>(N, M, Q);
 				// read image
 				readImage(in, *iptr);
+				
 				break;
 
 			case SAVE:
@@ -85,40 +137,74 @@ int main(){
 				// rotate an image by an angle.. with bilinear interpolation
 				cout << "Enter the degree value to rotate by, expressed as a float: ";
 				cin >> rot;
-				iptr->rotateBilinear(rot);
+				if(demo){
+					c_iptr->rotateBilinear(rot);
+					g_iptr->rotateBilinear(rot);
+				}
+				else
+					iptr->rotateBilinear(rot);
 				break;
 			
-
 			case ROTATE:
 				// rotate an image by an angle
 				cout << "Enter the degree value to rotate by, expressed as a float: ";
 				cin >> rot;
-				iptr->rotate(rot);
+				if(demo){
+					c_iptr->rotate(rot);
+					g_iptr->rotate(rot);
+				}
+				else
+					iptr->rotate(rot);
 				break;
 			
 			
 			case INFO:
 				// INFO logic
-				iptr->getImageInfo( N , M , Q );
-				cout << endl << "This image is " << M << " x " << N << " pixels and has, ";
-				cout << Q << " levels of gray. " << endl;
+				if( demo ){
+					c_iptr->getImageInfo( N , M , Q );
+					cout << endl << "The first image is " << M << " x " << N << " pixels and has, ";
+					cout << Q << " levels. " << endl;
+
+					g_iptr->getImageInfo( N , M , Q );
+					cout << endl << "The second image is " << M << " x " << N << " pixels and has, ";
+					cout << Q << " levels. " << endl;
+				}
+				else{
+					iptr->getImageInfo( N , M , Q );
+					cout << endl << "This image is " << M << " x " << N << " pixels and has, ";
+					cout << Q << " levels. " << endl;
+					cout << endl;
+					iptr->threshold( 10 );
+				}
 				break;
 
 			case GETVAL:
 				// get the value of a particular pixel
-				iptr->getImageInfo( N , M , Q );
+				if( demo )
+					c_iptr->getImageInfo( N , M , Q );
+				else
+					iptr->getImageInfo( N , M , Q );
+
 				cout << endl << "Please enter the coordinates of desired pixel separated by a space.. " << endl;
 				cout << "Note that values must be less than " << M << " and " << N << " repsectively: ";
 				cin >> j >> i;
 				// check bounds
 				i = ( i < N && i >= 0 ) ? i : 0;
 				j = ( j < M && j >= 0 ) ? j : 0;
-				cout << "The value at that pixel is: " << iptr->getPixelVal( i , j ) << endl;
+				if( demo ){
+					cout << "The value at that pixel in the first is: " << c_iptr->getPixelVal( i , j ) << endl;
+					cout << "The value at that pixel in the second is: " << g_iptr->getPixelVal( i , j ) << endl;
+				}
+				else
+					cout << "The value at that pixel is: " << iptr->getPixelVal( i , j ) << endl;
 				break;
 		
 			case SETVAL:
 				// Set the value of a particular pixel
-				iptr->getImageInfo( N , M , Q );
+				if( demo )
+					c_iptr->getImageInfo( N , M , Q );
+				else
+					iptr->getImageInfo( N , M , Q );
 				cout << endl << "Please enter the coordinates of your pixel and the " << endl;
 				cout << "desired value separated by a space (ie 0 0 255.." << endl;
 				cout << "Note that values must be less than " << M << " , " << N << " and " << Q + 1 << " respectively : ";
@@ -128,12 +214,21 @@ int main(){
 				j = ( j < M && j >= 0 ) ? j : 0;
 				newVal = ( newVal <= Q && newVal >= 0 ) ? newVal : Q;
 				// set new pixel value
-				iptr->setPixelVal( i , j, newVal );
+				if( demo ){
+					RGB val = newVal;
+					c_iptr->setPixelVal(i,j, val );
+					g_iptr->setPixelVal(i,j, newVal);
+				}
+				else
+					iptr->setPixelVal( i , j, newVal );
 				break;
 			
 			case SUBIMG:
 				// subimg logic
-				iptr->getImageInfo( N , M, Q );
+				if( demo )
+					c_iptr->getImageInfo( N , M , Q );
+				else
+					iptr->getImageInfo( N , M , Q );
 				cout << "Enter the top left x and y coordinates separated by ";
 				cout << "a space: ";
 				cin >> ulx >> uly;
@@ -149,15 +244,24 @@ int main(){
 					cout << "Those values are out of bounds.. enter again: ";
 					cin >> brx >> bry;
 				}
-
-				iptr->subImg( ulx, uly, brx, bry );
+				if( demo ){
+					c_iptr->subImg( ulx, uly, brx, bry );
+					g_iptr->subImg( ulx, uly, brx, bry );
+				}
+				else
+					iptr->subImg( ulx, uly, brx, bry );
 				
 				break;
 
 			case AVGGL:
 				// Print average gray level
-				cout << endl << "The average gray level for your image is: ";
-				cout << iptr->meanValue() << endl;
+				cout << endl << "The average color level for your images are: ";
+				if( demo ){
+					cout << "Color: " << c_iptr->meanValue() << endl;
+					cout << "Graylevel: " << g_iptr->meanValue() << endl;
+				}
+				else
+					cout << iptr->meanValue() << endl;
 				break;
 				
 			
@@ -167,7 +271,12 @@ int main(){
 				cin >> i;
 				// make sure it's positive
 				i = ( i > 0 ) ? i : 0;
-				iptr->enlarge( i );
+				if( demo ){
+					c_iptr->enlarge( i );
+					g_iptr->enlarge( i );
+				}
+				else
+					iptr->enlarge( i );
 				break;
 			
 			case SHRNK:
@@ -176,39 +285,61 @@ int main(){
 				cin >> i;
 				// make sure it's positive
 				i = ( i > 0 ) ? i : 0;
-				iptr->shrink( i );
+				if( demo ){
+					c_iptr->shrink( i );
+					g_iptr->shrink( i );
+				}
+				else
+					iptr->shrink( i );
 				break;
 			
 			case ADD:
-				// add two images together
-				// load an image to add
-				cout << endl << "Enter the filename of the image you want to add: ";
-				cin >> in;
-				// read image header
-				readImageHeader(in, N, M, Q, type);
-				// allocate memory for the image array
-				if( img ) delete img;
-				img = new ImageType<RGB>( N, M, Q);
-				// read image
-				readImage(in, *img);				
-				*iptr = *iptr + *img;
+				if( demo ){
+					*c_iptr = *c_iptr + *c_img;
+					*g_iptr = *g_iptr + *g_img;
+				}
+				else{
+					// add two images together
+					// load an image to add
+					cout << endl << "Enter the filename of the image you want to add: ";
+					cin >> in;
+					// read image header
+					readImageHeader(in, N, M, Q, type);
+					// allocate memory for the image array
+					if( img ) delete img;
+					img = new ImageType<int>( N, M, Q);
+					// read image
+					readImage(in, *img);				
+					*iptr = *iptr + *img;
+				}
 				break;
 
 			
 			case DIFF:
-				// compute the difference between two images
-				cout << endl << "Enter the filename of the image you want to subtract: ";
-				cin >> in;
-				readImageHeader( in, N, M, Q, type);
-				if( img ) delete img;
-				img = new ImageType<RGB>( N, M, Q);
-				readImage(in, *img);
-				*iptr = *iptr - *img;
+				if( demo ){
+					*c_iptr = *c_iptr - *c_img;
+					*g_iptr = *g_iptr - *g_img;
+				}
+				else{
+					// compute the difference between two images
+					cout << endl << "Enter the filename of the image you want to subtract: ";
+					cin >> in;
+					readImageHeader( in, N, M, Q, type);
+					if( img ) delete img;
+					img = new ImageType<int>( N, M, Q);
+					readImage(in, *img);
+					*iptr = *iptr - *img;
+				}
 				break;
 	
 			case NEG:
 				// negate an image
-				iptr->negate();
+				if( demo ){
+					c_iptr->negate();
+					g_iptr->negate();
+				}
+				else
+					iptr->negate();
 				break;
 
 			case RFLCT: 
@@ -220,14 +351,28 @@ int main(){
 					cin >> i;
 				}
 				if( i == 1 )
-					iptr->reflectH();
-				else
-					iptr->reflectV();
+					if( demo ){
+						c_iptr->reflectH();
+						g_iptr->reflectH();
+					}
+					else
+						iptr->reflectH();
+				else{
+					if( demo ){
+						c_iptr->reflectV();
+						g_iptr->reflectV();
+					}
+					else
+						iptr->reflectV();
+				}
 				break;
 
 			case TRANS:
 				// translate an img
-				iptr->getImageInfo(N , M, Q);
+				if( demo )
+					c_iptr->getImageInfo( N , M , Q );
+				else
+					iptr->getImageInfo( N , M , Q );
 				cout << endl << "Enter the translation offsets for the x and y separated by a space. ";
 				cout << "Values must be less than " << M << " and " << N << " respectively: ";
 				cin >> j >> i;
@@ -235,15 +380,24 @@ int main(){
 					cout << endl << "Those values are out of bounds. Enter again: ";
 					cin >> j >> i;
 				}
-				iptr->translate(j , i );
-				break;
-
-		
+				if( demo ){
+					c_iptr->translate(j , i );
+					g_iptr->translate(j , i );
+				}
+				else
+					iptr->translate(j , i );
+				break;		
 		
 			default:
 				cout << "That is not a valid choice!" << endl; 
 				break;
 		}
+	
+		if( demo ){
+			writeImage( "demoColor.ppm" , *c_iptr );
+			writeImage( "demoGray.pgm" , *g_iptr );
+		}
+
 		choice = menu();
 	}// End of main program loop
 
