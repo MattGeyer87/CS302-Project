@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include "image.h"
 #include "RGB.h"
+#include "pixel.h"
 
 
 
@@ -16,6 +17,7 @@ void readImage(char[], ImageType<int>&);
 void writeImage(char[], ImageType<int>&);
 void readImage(char[], ImageType<RGB>&);
 void writeImage(char[], ImageType<RGB>&);
+int computeComponents( ImageType<int>&, ImageType<int>& );
 RGB abs( RGB );
 RGB floor( RGB );
 
@@ -25,7 +27,7 @@ int menu();
 int main(){
  
 	int M, N, Q, i, j, newVal;
-	int ulx, uly, brx, bry;
+	int ulx, uly, brx, bry, comps;
 	double rot;
 	bool type, demo;
 	int choice;	
@@ -47,14 +49,16 @@ int main(){
 
 	// Menu constants
 	enum { LOAD, SAVE, ROTATEB, ROTATE, INFO, GETVAL, SETVAL, SUBIMG,
-			AVGGL, ENLG, SHRNK, ADD, DIFF, NEG, RFLCT, TRANS, QUIT}; 
+			AVGGL, ENLG, SHRNK, ADD, DIFF, NEG, RFLCT, TRANS, AUTOTHRESH, 
+			THRESH, DIALATE, ERODE, CONCOMP, QUIT}; 
 
-	cout << "Would you like to run in Demo mode? Enter 1 - yes , 2 - no: ";
-	cin >> choice;
-
-	if( choice == 1 )
-		demo = true;
-	else
+	//cout << "Would you like to run in Demo mode? Enter 1 - yes , 2 - no: ";
+	//cin >> choice;
+   
+	
+	//if( choice == 1 )
+    //		demo = true;
+    //else
 		demo = false;
 
 	if( demo ){
@@ -174,7 +178,6 @@ int main(){
 					cout << endl << "This image is " << M << " x " << N << " pixels and has, ";
 					cout << Q << " levels. " << endl;
 					cout << endl;
-					iptr->threshold( 10 );
 				}
 				break;
 
@@ -387,6 +390,31 @@ int main(){
 				else
 					iptr->translate(j , i );
 				break;		
+			
+			case AUTOTHRESH:
+				iptr->AutoThreshold( 128 );
+				break;
+			
+			case THRESH:
+				iptr->threshold( 128 );
+				break;
+
+			case DIALATE:
+				iptr->dialate();
+				break;
+
+			case ERODE:
+				iptr->erode();
+				break;
+
+			case CONCOMP:
+				iptr->getImageInfo( N , M, Q );
+				if ( img ) delete img;
+				img = new ImageType<int>( N , M , Q );
+				comps = computeComponents( *iptr , *img );
+				*iptr = *img;
+				cout << "Number of components: " << comps << endl;
+				break;
 		
 			default:
 				cout << "That is not a valid choice!" << endl; 
@@ -397,6 +425,8 @@ int main(){
 			writeImage( "demoColor.ppm" , *c_iptr );
 			writeImage( "demoGray.pgm" , *g_iptr );
 		}
+		else
+			writeImage( "default.pgm", *iptr );
 
 		choice = menu();
 	}// End of main program loop
@@ -433,7 +463,12 @@ int menu(){
 	cout << "14 - Negate an Image." << endl;
 	cout << "15 - Reflect Image." << endl;
 	cout << "16 - Translate Image." << endl;
-	cout << "17 - Exit the program." << endl;
+	cout << "17 - Auto-Threshold." << endl;
+	cout << "18 - Threshold." << endl;
+	cout << "19 - Dialate. " << endl;
+	cout << "20 - Erode." << endl;
+	cout << "21 - Connected Components." << endl;
+	cout << "22 - Exit the program." << endl;
 	cout << endl << "Enter your choice: ";
 	cin >> choice;
 	cout << endl;

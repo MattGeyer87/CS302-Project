@@ -175,11 +175,23 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
+				RelativePath=".\component.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\driver.cpp"
 				>
 			</File>
 			<File
 				RelativePath=".\image.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\pixel.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\queue.cpp"
 				>
 			</File>
 			<File
@@ -192,6 +204,10 @@
 			</File>
 			<File
 				RelativePath=".\RGB.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\stack.cpp"
 				>
 			</File>
 			<File
@@ -209,7 +225,19 @@
 				>
 			</File>
 			<File
+				RelativePath=".\pixel.h"
+				>
+			</File>
+			<File
+				RelativePath=".\queue.h"
+				>
+			</File>
+			<File
 				RelativePath=".\RGB.h"
+				>
+			</File>
+			<File
+				RelativePath=".\stack.h"
 				>
 			</File>
 		</Filter>

@@ -124,6 +124,7 @@ void ImageType<PT>::clearPV(){
 		for( int j = 0; j < M; j++)
 			pixelValue[i][j] = 0;
 }
+
 template<class PT>
 void ImageType<PT>::tempToPV(){
 	// store all the values in the temp array to the
@@ -133,6 +134,16 @@ void ImageType<PT>::tempToPV(){
 	for( int i = 0; i < N; i++)
 		for( int j = 0; j < M; j++)
 			pixelValue[i][j] = temp[i][j];
+}
+
+template<class PT>
+void ImageType<PT>::setWhite(){
+	// set all the values in the pixel array to black
+	// Matt
+
+	for( int i = 0; i < N; i++ )
+		for( int j = 0; j < M; j++)
+			pixelValue[i][j] = 255;
 }
 
 template<class PT>
@@ -682,7 +693,7 @@ void ImageType<PT>::translate( int offsetX , int offsetY ){
 }
 
 template<class PT>
-void ImageType<PT>::threshold( int t ){
+void ImageType<PT>::AutoThreshold( int t ){
 	// Threshold an image
 
 	// Fix later to be efficient
@@ -694,6 +705,7 @@ void ImageType<PT>::threshold( int t ){
     int k = 0,
 		l = 0;
 
+	
 	while( thresh != prevThresh ){
 		for( int i = 0; i < N; i++ ){
 			for( int j = 0; j < M; j++ ){
@@ -716,8 +728,8 @@ void ImageType<PT>::threshold( int t ){
 		for( int i = 0; i < l; i++)
 			bgSum += bgPixels[i];
 
-		objAvg = objSum / k;
-		bgAvg = bgSum / l;
+		objAvg = objSum / k + 1;
+		bgAvg = bgSum / l + 1;
 
 		// new threshold 
 		thresh = (objAvg + bgAvg) / 2;
@@ -731,14 +743,105 @@ void ImageType<PT>::threshold( int t ){
 		bgAvg = 0;
 
 	}
+	
+	for( int i = 0; i < N; i++ ){
+		for(int j = 0; j < M; j++ ){
+			if( pixelValue[i][j] > thresh )
+				pixelValue[i][j] = 255;
+			else
+				pixelValue[i][j] = 0;
+		}
+	}
 
-	cout << thresh << " " << prevThresh << " " << t;
+	cout << thresh << " " << t;
 }
 		
-		
+template<class PT>
+void ImageType<PT>::threshold( int thresh ){	
+	// basic, non optomized threshold
+	for( int i = 0; i < N; i++ ){
+		for(int j = 0; j < M; j++ ){
+			if( pixelValue[i][j] > thresh )
+				pixelValue[i][j] = 255;
+			else
+				pixelValue[i][j] = 0;
+		}
+	}
+}
 
+template<class PT>
+void ImageType<PT>::dialate(){
+	// dialiate a binary image
 
-    
+	bool wN = false;
+
+	for( int i = 0; i < N; i++ ){
+		for( int j = 0; j < M; j++ ){
+
+			// start checking the 8 neighbors
+			for( int a = -1; a < 2; a++ ){
+				for( int b = -1; b < 2; b++ ){
+					if( a == 0 && b == 0) continue;
+					// make sure it's in bounds
+					if( i + a >= 0 && i + a < N && j + b >= 0 && j + b < M ){
+						// if at least one neighbor is white, the pixel in the output will be white
+						if( pixelValue[i + a][j + b] == 255 ){
+							temp[i][j] = 255;
+							wN = true;
+						}
+					}
+				}
+			}
+			// if the pixel had no white 
+			if( !wN )
+				temp[i][j] = pixelValue[i][j];
+			else 
+				wN = false;
+		}
+	}
+
+	clearPV();
+	tempToPV();
+	clearTemp();
+}
+
+template<class PT>
+void ImageType<PT>::erode(){
+	// erode the binary image
+
+	bool allWhite = true;
+
+	for( int i = 0; i < N; i++ ){
+		for( int j = 0; j < M; j++ ){
+
+			// start checking the 8 neighbors
+			for( int a = -1; a < 2; a++ ){
+				for( int b = -1; b < 2; b++ ){
+					// make sure it's in bounds
+					if( a == 0 && b == 0) continue;
+					if( i + a >= 0 && i + a < N && j + b >= 0 && j + b < M ){
+						// if at least one neighbor is white, the pixel in the output will be white
+						if( pixelValue[i + a][j + b] == 0 ){
+							allWhite = false;
+						}
+					}
+				}
+			}
+			if( !allWhite ){
+				temp[i][j] = 0;
+				allWhite = true;
+			}
+			else{ 
+				temp[i][j] = pixelValue[i][j];
+			}
+		}
+	}
+
+	clearPV();
+	tempToPV();
+	clearTemp();
+}
+
 
 	
 
