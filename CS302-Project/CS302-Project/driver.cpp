@@ -19,6 +19,7 @@ void writeImage(char[], ImageType<int>&);
 void readImage(char[], ImageType<RGB>&);
 void writeImage(char[], ImageType<RGB>&);
 int computeComponents( ImageType<int>&, ImageType<int>& , slist<region>& );
+void computeRegionProperties( ImageType<int>& , region& );
 RGB abs( RGB );
 RGB floor( RGB );
 
@@ -48,9 +49,11 @@ int main(){
 	ImageType<int> *g_iptr = NULL,
 		           *g_img = NULL,
 				   *iptr = NULL,
-				   *img = NULL;
+				   *img = NULL,
+				   *src = NULL;
 
 	slist<region> *regions = new slist<region>;
+	region t_reg, reg;
 
 	// Menu constants
 	enum { LOAD, SAVE, ROTATEB, ROTATE, INFO, GETVAL, SETVAL, SUBIMG,
@@ -110,6 +113,7 @@ int main(){
 		iptr = new ImageType<int>(N, M, Q);
 		// read image
 		readImage(in, *iptr);
+		*src = *iptr;
 	}
 
 	// Show user the menu
@@ -463,6 +467,15 @@ int main(){
 				*iptr = *img;
 				cout << "That image has " << comps << " connected components." << endl << endl;
 				cout << "Number of components in the list: " << regions->getLength() << endl;
+				
+				// once the list is created the properties of each region in the list 
+				// are computed so the regions can be classified
+				regions->resetList();
+				for( int k = 0; k < regions->getLength(); k++ ){
+					regions->getNextItem( t_reg );
+					computeRegionProperties( *src , t_reg );
+				}
+
 				system("PAUSE");
 				break;
 		
