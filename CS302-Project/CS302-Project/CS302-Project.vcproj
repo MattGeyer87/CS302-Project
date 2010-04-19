@@ -187,6 +187,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\node.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\pixel.cpp"
 				>
 			</File>
@@ -203,11 +207,23 @@
 				>
 			</File>
 			<File
+				RelativePath=".\region.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\RGB.cpp"
 				>
 			</File>
 			<File
+				RelativePath=".\slist.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\stack.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\ulist.cpp"
 				>
 			</File>
 			<File
@@ -233,11 +249,23 @@
 				>
 			</File>
 			<File
+				RelativePath=".\region.h"
+				>
+			</File>
+			<File
 				RelativePath=".\RGB.h"
 				>
 			</File>
 			<File
+				RelativePath=".\slist.h"
+				>
+			</File>
+			<File
 				RelativePath=".\stack.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ulist.h"
 				>
 			</File>
 		</Filter>

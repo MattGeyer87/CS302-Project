@@ -27,7 +27,7 @@ class ImageType {
 	void translate(int, int);
 	void AutoThreshold(int);
 	void threshold(int);
-	void dialate();
+	void dilate();
 	void erode();
 	void setWhite();
 

@@ -752,8 +752,6 @@ void ImageType<PT>::AutoThreshold( int t ){
 				pixelValue[i][j] = 0;
 		}
 	}
-
-	cout << thresh << " " << t;
 }
 		
 template<class PT>
@@ -770,8 +768,8 @@ void ImageType<PT>::threshold( int thresh ){
 }
 
 template<class PT>
-void ImageType<PT>::dialate(){
-	// dialiate a binary image
+void ImageType<PT>::dilate(){
+	// diliate a binary image
 
 	bool wN = false;
 

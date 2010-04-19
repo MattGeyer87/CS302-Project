@@ -7,8 +7,9 @@
 #include "image.h"
 #include "RGB.h"
 #include "pixel.h"
-
-
+#include <time.h>
+#include "slist.h"
+#include "region.h"
 
 using namespace std;
 
@@ -17,7 +18,7 @@ void readImage(char[], ImageType<int>&);
 void writeImage(char[], ImageType<int>&);
 void readImage(char[], ImageType<RGB>&);
 void writeImage(char[], ImageType<RGB>&);
-int computeComponents( ImageType<int>&, ImageType<int>& );
+int computeComponents( ImageType<int>&, ImageType<int>& , slist<region>& );
 RGB abs( RGB );
 RGB floor( RGB );
 
@@ -31,6 +32,8 @@ int main(){
 	double rot;
 	bool type, demo;
 	int choice;	
+	long timer;
+
 	char *c_in, *g_in, *c_img_in, *g_img_in, *out, *in;
 	in = new char[256];
 	c_in = new char[256];
@@ -47,10 +50,12 @@ int main(){
 				   *iptr = NULL,
 				   *img = NULL;
 
+	slist<region> *regions = new slist<region>;
+
 	// Menu constants
 	enum { LOAD, SAVE, ROTATEB, ROTATE, INFO, GETVAL, SETVAL, SUBIMG,
 			AVGGL, ENLG, SHRNK, ADD, DIFF, NEG, RFLCT, TRANS, AUTOTHRESH, 
-			THRESH, DIALATE, ERODE, CONCOMP, QUIT}; 
+			THRESH, DILATE, ERODE, CONCOMP, CCTT, QUIT}; 
 
 	//cout << "Would you like to run in Demo mode? Enter 1 - yes , 2 - no: ";
 	//cin >> choice;
@@ -113,8 +118,9 @@ int main(){
 	// Main program loop.. Goes until the user chooses to quit
 	while( choice != QUIT ){
 		switch(choice){
-
+			
 			case LOAD:
+				system("cls");
 				// load an image to be manipulated
 				cout << endl << "Enter the filename of the image you want to load: ";
 				cin >> in;
@@ -131,6 +137,7 @@ int main(){
 
 			case SAVE:
 				// save the image
+				system("cls");
 				cout << endl << "Enter a filename to save your image: ";
 				cin >> out;
 				writeImage(out, *iptr);
@@ -139,6 +146,7 @@ int main(){
 				
 			case ROTATEB:
 				// rotate an image by an angle.. with bilinear interpolation
+				system("cls");
 				cout << "Enter the degree value to rotate by, expressed as a float: ";
 				cin >> rot;
 				if(demo){
@@ -151,6 +159,7 @@ int main(){
 			
 			case ROTATE:
 				// rotate an image by an angle
+				system("cls");
 				cout << "Enter the degree value to rotate by, expressed as a float: ";
 				cin >> rot;
 				if(demo){
@@ -164,6 +173,7 @@ int main(){
 			
 			case INFO:
 				// INFO logic
+				system("cls");
 				if( demo ){
 					c_iptr->getImageInfo( N , M , Q );
 					cout << endl << "The first image is " << M << " x " << N << " pixels and has, ";
@@ -179,10 +189,12 @@ int main(){
 					cout << Q << " levels. " << endl;
 					cout << endl;
 				}
+				system("PAUSE");
 				break;
 
 			case GETVAL:
 				// get the value of a particular pixel
+				system("cls");
 				if( demo )
 					c_iptr->getImageInfo( N , M , Q );
 				else
@@ -200,10 +212,12 @@ int main(){
 				}
 				else
 					cout << "The value at that pixel is: " << iptr->getPixelVal( i , j ) << endl;
+				system("PAUSE");
 				break;
 		
 			case SETVAL:
 				// Set the value of a particular pixel
+				system("cls");
 				if( demo )
 					c_iptr->getImageInfo( N , M , Q );
 				else
@@ -228,6 +242,7 @@ int main(){
 			
 			case SUBIMG:
 				// subimg logic
+				system("cls");
 				if( demo )
 					c_iptr->getImageInfo( N , M , Q );
 				else
@@ -258,17 +273,20 @@ int main(){
 
 			case AVGGL:
 				// Print average gray level
+				system("cls");
 				cout << endl << "The average color level for your images are: ";
 				if( demo ){
 					cout << "Color: " << c_iptr->meanValue() << endl;
 					cout << "Graylevel: " << g_iptr->meanValue() << endl;
 				}
 				else
-					cout << iptr->meanValue() << endl;
+					cout << iptr->meanValue() << endl << endl;
+				system("PAUSE");
 				break;
 				
 			
 			case ENLG:
+				system("cls");
 				// enlarge an image by a factor S
 				cout << "Enter the positive integer factor by which you'd like to enlarge: ";
 				cin >> i;
@@ -284,6 +302,7 @@ int main(){
 			
 			case SHRNK:
 				// shrink an image by a factor s
+				system("cls");
 				cout << "Enter the positive integer factor by which you'd like to shrink: ";
 				cin >> i;
 				// make sure it's positive
@@ -297,6 +316,7 @@ int main(){
 				break;
 			
 			case ADD:
+				system("cls");
 				if( demo ){
 					*c_iptr = *c_iptr + *c_img;
 					*g_iptr = *g_iptr + *g_img;
@@ -319,6 +339,7 @@ int main(){
 
 			
 			case DIFF:
+				system("cls");
 				if( demo ){
 					*c_iptr = *c_iptr - *c_img;
 					*g_iptr = *g_iptr - *g_img;
@@ -337,6 +358,7 @@ int main(){
 	
 			case NEG:
 				// negate an image
+				system("cls");
 				if( demo ){
 					c_iptr->negate();
 					g_iptr->negate();
@@ -347,6 +369,7 @@ int main(){
 
 			case RFLCT: 
 				// reflect an image
+				system("cls");
 				cout << endl << "Enter 1 to reflect along the horizon, or 2 to reflect vertically: ";
 				cin >> i;
 				while( i > 2 || i < 0 ){
@@ -372,6 +395,7 @@ int main(){
 
 			case TRANS:
 				// translate an img
+				system("cls");
 				if( demo )
 					c_iptr->getImageInfo( N , M , Q );
 				else
@@ -392,31 +416,58 @@ int main(){
 				break;		
 			
 			case AUTOTHRESH:
+				system("cls");
 				iptr->AutoThreshold( 128 );
 				break;
 			
 			case THRESH:
+				system("cls");
 				iptr->threshold( 128 );
 				break;
 
-			case DIALATE:
-				iptr->dialate();
+			case DILATE:
+				system("cls");
+				iptr->dilate();
 				break;
 
 			case ERODE:
+				system("cls");
 				iptr->erode();
 				break;
 
 			case CONCOMP:
+				system("cls");
 				iptr->getImageInfo( N , M, Q );
 				if ( img ) delete img;
 				img = new ImageType<int>( N , M , Q );
-				comps = computeComponents( *iptr , *img );
+				timer = clock();
+				comps = computeComponents( *iptr , *img , *regions);
+				cout <<  (double)(( clock() - timer ) / CLOCKS_PER_SEC) << endl;
 				*iptr = *img;
-				cout << "Number of components: " << comps << endl;
+				cout << "Number of components: " << comps << endl << endl;
+				cout << "Number of components in the list: " << regions->getLength() << endl;
+				system("PAUSE");
+				break;
+
+			case CCTT:
+				system("cls");
+				cout << "************** Connected Components *************" << endl << endl;
+				iptr->getImageInfo( N , M , Q );
+				if( img ) delete img;
+				img = new ImageType<int>(N , M , Q );
+				iptr->AutoThreshold(100);
+				iptr->dilate();
+				iptr->erode();
+				iptr->erode();
+				comps = computeComponents(*iptr , *img , *regions);
+				*iptr = *img;
+				cout << "That image has " << comps << " connected components." << endl << endl;
+				cout << "Number of components in the list: " << regions->getLength() << endl;
+				system("PAUSE");
 				break;
 		
 			default:
+				system("cls");
 				cout << "That is not a valid choice!" << endl; 
 				break;
 		}
@@ -435,6 +486,7 @@ int main(){
 	// Deallocate memory for the image
 	if( iptr ) delete iptr;
 	if( img ) delete img;
+	system("cls");
 	cout << endl << endl << "Goodbye!" << endl << endl << endl;
 	system("PAUSE");
 
@@ -465,10 +517,11 @@ int menu(){
 	cout << "16 - Translate Image." << endl;
 	cout << "17 - Auto-Threshold." << endl;
 	cout << "18 - Threshold." << endl;
-	cout << "19 - Dialate. " << endl;
+	cout << "19 - Dilate. " << endl;
 	cout << "20 - Erode." << endl;
 	cout << "21 - Connected Components." << endl;
-	cout << "22 - Exit the program." << endl;
+	cout << "22 - Multiple Step Compute Components." << endl;
+	cout << "23 - Exit the program." << endl;
 	cout << endl << "Enter your choice: ";
 	cin >> choice;
 	cout << endl;
