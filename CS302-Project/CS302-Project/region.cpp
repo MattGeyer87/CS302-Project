@@ -89,6 +89,18 @@ ulist<pixel>* region::getPixelList(){
 // Overloaded Operators //
 //**********************//
 
+region& region::operator = ( const region& rhs ){
+	//overloaded assignment operator
+	if( this != &rhs ){
+		size = rhs.size;
+		eccentricity = rhs.eccentricity;
+		orientation = rhs.orientation;
+		intensity = rhs.intensity;
+		pixels = rhs.pixels;
+	}
+	return *this;
+}
+
 bool region::operator < ( region& rhs ){
 	// overloaded less than operator
 	return( size < rhs.getSize() );

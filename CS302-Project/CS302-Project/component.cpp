@@ -13,7 +13,7 @@ using namespace std;
 double moments( double p , double q , ulist<pixel>& rp ){
 	// compute the moments of a region
 
-	double moment;
+	double moment = 0;
 	int i, j;
 	pixel pix;
 
@@ -33,7 +33,7 @@ double moments( double p , double q , ulist<pixel>& rp ){
 double centralMoments( double p , double q, double xbar , double ybar , ulist<pixel>& rp ){
 	// compute central moments of a region once centroid has been determined
 
-	double c_moment;
+	double c_moment = 0;
 	int i, j;
 	pixel pix;
 
@@ -58,13 +58,13 @@ void computeRegionProperties( ImageType<int>& source , region& reg ){
 	double xbar, ybar, pmax , pmin;
 	double orient, rad;
 
-	int i, j, mean;
+	int i = 0, j = 0, mean = 0, size = 0;
 	
 	pixel pix;
 	ulist<pixel> *ulptr;
-	region *rptr;
+	region *rptr = NULL;
 
-	*rptr = reg;
+	rptr = &reg;
 
 	ulptr = reg.getPixelList();
 
@@ -85,7 +85,8 @@ void computeRegionProperties( ImageType<int>& source , region& reg ){
      			  2 * ( centralMoments( 0 , 2 , xbar , ybar , *ulptr ) * centralMoments( 2 , 0 , xbar , ybar , *ulptr ) ) +
 				  4 * ( pow( centralMoments( 1 , 1 , xbar , ybar , *ulptr ) , 2 ) ) );
 
-				
+			
+	cout << pmin << " " << pmax << endl;
 	// determine orientation
 	rad = atan2( pmax - centralMoments( 2 , 0 , xbar , ybar , *ulptr ) , centralMoments( 1 , 1 , xbar , ybar , *ulptr ) );
 
@@ -103,10 +104,12 @@ void computeRegionProperties( ImageType<int>& source , region& reg ){
 		pix.getPixelVals( i , j );
 		mean += source.getPixelVal( i , j );
 	}
-    
-	mean = int( mean / ulptr->getLength() );
-	rptr->setIntensity( mean );
-		
+    size = ulptr->getLength();
+	
+	if(size > 0 ){
+		mean = int( mean / size );
+		rptr->setIntensity( mean );
+	}	
 
 	return;
 }
@@ -175,12 +178,17 @@ int computeComponents( ImageType<int>& input , ImageType<int>& output , slist<re
 				rptr = new region;
 				ulptr = new ulist<pixel>;
 				rptr->setPixelList( ulptr );
+
+				
 				
 				// populate the pixel list and label the output image
 				findComponentBFS( input, output, *ulptr, seed, label );
 				
+				cout << ( rptr->getPixelList() )->getLength() << endl; 
+
 				//set the size of the region
 				rptr->setSize( ulptr->getLength() );
+				cout << ulptr->getLength() << endl;
 				
 				// threshold region and perform classification steps
 				if( rptr->getSize() > 5 )

@@ -6,6 +6,7 @@ class region{
 public:
 	region();
 	~region();
+	region& operator = ( const region& );
 	bool operator <= ( region& );
 	bool operator >= ( region& );
 	bool operator < ( region& );

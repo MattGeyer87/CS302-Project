@@ -53,7 +53,7 @@ int main(){
 				   *src = NULL;
 
 	slist<region> *regions = new slist<region>;
-	region t_reg, reg;
+	region t_reg;
 
 	// Menu constants
 	enum { LOAD, SAVE, ROTATEB, ROTATE, INFO, GETVAL, SETVAL, SUBIMG,
@@ -110,10 +110,12 @@ int main(){
 		// de-allocate memory from old image
 		if( iptr ) delete iptr;
 		// allocate memory for the image array
-		iptr = new ImageType<int>(N, M, Q);
+		iptr = new ImageType<int>( N , M , Q );
+		src = new ImageType<int>( N , M , Q );
 		// read image
 		readImage(in, *iptr);
 		*src = *iptr;
+	
 	}
 
 	// Show user the menu
@@ -470,11 +472,26 @@ int main(){
 				
 				// once the list is created the properties of each region in the list 
 				// are computed so the regions can be classified
+				
+				cout << endl << endl;
+
+				
 				regions->resetList();
 				for( int k = 0; k < regions->getLength(); k++ ){
-					regions->getNextItem( t_reg );
+					if(! regions->isLastItem() )
+						regions->getNextItem( t_reg );
+
 					computeRegionProperties( *src , t_reg );
+					
+					// print summary to the screen
+					cout << "Region: " << k << endl;
+					cout << "Region Size: " << (t_reg.getPixelList())->getLength() << endl;
+					cout << "Region Size: " << t_reg.getSize() << endl;
+					cout << "Orientation: " << t_reg.getOrientation() << " degrees. " << endl;
+					cout << "Eccentricity: " << t_reg.getEccentricity() << endl;
+					cout << "Intensity: " << t_reg.getIntensity() << endl;
 				}
+				
 
 				system("PAUSE");
 				break;

@@ -16,7 +16,7 @@ public:
 	void deleteItem( PT );
 	void resetList();
 	bool isLastItem();
-	PT* getNextItem();
+	void getNextItem( PT& );
 private:
 	int length;
 	node<PT>* data;
