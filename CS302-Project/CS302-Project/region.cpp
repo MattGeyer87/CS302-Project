@@ -7,6 +7,21 @@ region::region(){
 	pixels = new ulist<pixel>;
 }
 
+region::region( const region& r ){
+	// copy constructor
+	pixel p;
+	size = r.size;
+	eccentricity = r.eccentricity;
+	orientation = r.orientation;
+	intensity = r.intensity;
+	r.pixels->resetList();
+	pixels->makeEmpty();
+	while( !r.pixels->isLastItem() ){
+		r.pixels->getNextItem( p );
+		pixels->insertItem( p );
+	}
+}
+
 region::~region(){
 	// destructor
 	pixels->makeEmpty();
@@ -21,6 +36,8 @@ void region::setSize( int s ){
 }
 
 void region::setEccentricity( int e ){
+	
+	e = ( e < 0 )? 0 : e;
 	eccentricity = e;
 }
 
@@ -92,11 +109,17 @@ ulist<pixel>* region::getPixelList(){
 region& region::operator = ( const region& rhs ){
 	//overloaded assignment operator
 	if( this != &rhs ){
+		pixel p;
 		size = rhs.size;
 		eccentricity = rhs.eccentricity;
 		orientation = rhs.orientation;
 		intensity = rhs.intensity;
-		pixels = rhs.pixels;
+		rhs.pixels->resetList();
+		pixels->makeEmpty();
+		while( !rhs.pixels->isLastItem() ){
+			rhs.pixels->getNextItem( p );
+			pixels->insertItem( p );
+		}	
 	}
 	return *this;
 }

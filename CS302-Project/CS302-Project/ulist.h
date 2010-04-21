@@ -9,18 +9,19 @@ public:
 	ulist();
 	~ulist();
 	void makeEmpty();
-	bool isFull();
-	int getLength();
+	bool isFull() const;
+	int getLength() const;
 	void retrieveItem( PT& , bool& );
-	void insertItem( PT );
+	void insertItem( PT& );
 	void deleteItem( PT );
 	void resetList();
-	bool isLastItem();
+	bool isLastItem() const;
 	void getNextItem( PT& );
 
 private:
 	int length;
-	node<PT> *data, *cpos;
+	node<PT> *data;
+	node<PT> *cpos;
 };
 
 

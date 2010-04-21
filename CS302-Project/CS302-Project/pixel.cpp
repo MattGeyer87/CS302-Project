@@ -13,6 +13,11 @@ pixel::pixel(int y, int x){
 	j = x;
 }
 
+pixel::pixel( const pixel& p ){
+	i = p.i;
+	j = p.j;
+}
+
 
 void pixel::getPixelVals( int& y, int& x) const{
 	y = i;
@@ -30,9 +35,8 @@ pixel& pixel::operator = ( const pixel& rhs ){
 	int x, y;
 
 	if( this != &rhs ){
-		rhs.getPixelVals( y , x );
-		i = y;
-		j = x;
+		i = rhs.i;
+		j = rhs.j;
 
 	}	
 	return *this;

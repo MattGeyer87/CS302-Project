@@ -10,6 +10,7 @@
 #include <time.h>
 #include "slist.h"
 #include "region.h"
+#include "ulist.h"
 
 using namespace std;
 
@@ -18,8 +19,9 @@ void readImage(char[], ImageType<int>&);
 void writeImage(char[], ImageType<int>&);
 void readImage(char[], ImageType<RGB>&);
 void writeImage(char[], ImageType<RGB>&);
-int computeComponents( ImageType<int>&, ImageType<int>& , slist<region>& );
+int computeComponents( ImageType<int>&, ImageType<int>& , ImageType<int>&, slist<region>& );
 void computeRegionProperties( ImageType<int>& , region& );
+void classifyRegions( ImageType<int>& , ImageType<int>& , slist<region>& );
 RGB abs( RGB );
 RGB floor( RGB );
 
@@ -50,10 +52,13 @@ int main(){
 		           *g_img = NULL,
 				   *iptr = NULL,
 				   *img = NULL,
-				   *src = NULL;
+				   *src = NULL,
+				   *classout = NULL;
 
+	ulist<pixel> *ul, *ul2;
 	slist<region> *regions = new slist<region>;
-	region t_reg;
+	region *t_reg, *b_reg;
+	pixel *pix, *pix2;
 
 	// Menu constants
 	enum { LOAD, SAVE, ROTATEB, ROTATE, INFO, GETVAL, SETVAL, SUBIMG,
@@ -109,9 +114,12 @@ int main(){
 		readImageHeader(in, N, M, Q, type);
 		// de-allocate memory from old image
 		if( iptr ) delete iptr;
+		if( src ) delete src;
 		// allocate memory for the image array
 		iptr = new ImageType<int>( N , M , Q );
 		src = new ImageType<int>( N , M , Q );
+		classout = new ImageType<int>( N , M , Q );
+		classout->setWhite();
 		// read image
 		readImage(in, *iptr);
 		*src = *iptr;
@@ -134,10 +142,16 @@ int main(){
 				readImageHeader(in, N, M, Q, type);
 				// de-allocate memory from old image
 				if( iptr ) delete iptr;
+				if( src ) delete src;
+				if( classout ) delete classout;
 				// allocate memory for the image array
 				iptr = new ImageType<int>(N, M, Q);
+				src = new ImageType<int>( N , M , Q );
+				classout = new ImageType<int>( N , M , Q );
+				classout->setWhite();
 				// read image
 				readImage(in, *iptr);
+				*src = *iptr;
 				
 				break;
 
@@ -443,11 +457,12 @@ int main(){
 
 			case CONCOMP:
 				system("cls");
+				regions->makeEmpty();
 				iptr->getImageInfo( N , M, Q );
 				if ( img ) delete img;
 				img = new ImageType<int>( N , M , Q );
 				timer = clock();
-				comps = computeComponents( *iptr , *img , *regions);
+				comps = computeComponents( *iptr , *img , *src,  *regions);
 				cout <<  (double)(( clock() - timer ) / CLOCKS_PER_SEC) << endl;
 				*iptr = *img;
 				cout << "Number of components: " << comps << endl << endl;
@@ -458,6 +473,7 @@ int main(){
 			case CCTT:
 				system("cls");
 				cout << "************** Connected Components *************" << endl << endl;
+				regions->makeEmpty();
 				iptr->getImageInfo( N , M , Q );
 				if( img ) delete img;
 				img = new ImageType<int>(N , M , Q );
@@ -465,35 +481,36 @@ int main(){
 				iptr->dilate();
 				iptr->erode();
 				iptr->erode();
-				comps = computeComponents(*iptr , *img , *regions);
+				comps = computeComponents(*iptr , *img , *src , *regions);
 				*iptr = *img;
-				cout << "That image has " << comps << " connected components." << endl << endl;
-				cout << "Number of components in the list: " << regions->getLength() << endl;
+				cout << "Number of connected components in the list: " << regions->getLength() << endl;
 				
 				// once the list is created the properties of each region in the list 
 				// are computed so the regions can be classified
 				
 				cout << endl << endl;
 
-				
+				t_reg = new region;
 				regions->resetList();
-				for( int k = 0; k < regions->getLength(); k++ ){
-					if(! regions->isLastItem() )
-						regions->getNextItem( t_reg );
+				cout << endl << endl;
 
-					computeRegionProperties( *src , t_reg );
+				
+				for( int k = 0; k < regions->getLength(); k++ ){
+					if(! regions->isLastItem() ){
+						regions->getNextItem( *t_reg );
+					}
 					
 					// print summary to the screen
-					cout << "Region: " << k << endl;
-					cout << "Region Size: " << (t_reg.getPixelList())->getLength() << endl;
-					cout << "Region Size: " << t_reg.getSize() << endl;
-					cout << "Orientation: " << t_reg.getOrientation() << " degrees. " << endl;
-					cout << "Eccentricity: " << t_reg.getEccentricity() << endl;
-					cout << "Intensity: " << t_reg.getIntensity() << endl;
+					cout << "Region: " << k + 1 << endl;
+					cout << "Region Size: " << t_reg->getSize() << endl;
+					cout << "Orientation: " << t_reg->getOrientation() << " degrees. " << endl;
+					cout << "Eccentricity: " << t_reg->getEccentricity() << endl;
+					cout << "Intensity: " << t_reg->getIntensity() << endl;
+					cout << endl << endl;
 				}
-				
 
-				system("PAUSE");
+				// allow the user to classify the regions they want to see
+				classifyRegions( *classout , *src , *regions );
 				break;
 		
 			default:
@@ -509,6 +526,7 @@ int main(){
 		else
 			writeImage( "default.pgm", *iptr );
 
+		system("cls");
 		choice = menu();
 	}// End of main program loop
 
@@ -557,6 +575,117 @@ int menu(){
 	cout << endl;
 	return choice - 1;
 }// END MENU
+
+void classifyRegions( ImageType<int>& in , ImageType<int>& src , slist<region>& rList ){
+	// give the user options to view specific regions
+
+	slist<region> trList;
+	ulist<pixel> *tpList;
+	region *t_reg = NULL;
+	pixel pix;
+	int a = 0,
+		b = 0,
+		i = 0,
+		j = 0,
+		flag = 0;
+
+	int choice = 0;
+	enum { SIZE , ORIENT , ECCENT , INTNSTY , QUIT };
+
+	do{
+		cout << endl << endl;
+		cout << "Classify Region Menu: " << endl;
+		cout << "1 - Regions by Size." << endl;
+		cout << "2 - Regions by orientation." << endl;
+		cout << "3 - Regions by eccentricity." << endl;
+		cout << "4 - Regions by intensity." << endl;
+		cout << "5 - Return to main menu." << endl;
+		cout << endl << "Enter your choice: ";
+		cin >> choice;
+
+		switch(choice - 1){
+			case SIZE:
+				// threshold by size
+				cout << "Enter two sizes to threshold between separated by a space: ";
+				cin >> a >> b;
+				flag = SIZE;
+				break;
+			case ORIENT:
+				cout << "Enter two orientations to threshold between separated by a space: ";
+				cin >> a >> b;
+				flag = ORIENT;
+				break;
+			case ECCENT:
+				cout << "Enter two eccentricities to threshold between separated by a space: ";
+				cin >> a >> b;
+				flag = ECCENT;
+				break;
+			case INTNSTY:
+				cout << "Enter two intesnsities to threshold between separated by a space: ";
+				cin >> a >> b;
+				flag = INTNSTY;
+				break;
+			case QUIT:
+				return;
+				break;
+			default:
+				break;
+		}
+		
+		rList.resetList();
+		trList.makeEmpty();
+		in.setWhite();
+
+		t_reg = new region;
+
+		// iterate through the region list and add
+		// qualified regions to the temp region list
+		while( !rList.isLastItem() ){
+			rList.getNextItem( *t_reg );
+			switch (flag){
+				case SIZE:
+					if( t_reg->getSize() > a && t_reg->getSize() < b ) trList.insertItem( *t_reg );
+					break;
+				case ORIENT:
+					if( t_reg->getOrientation() > a && t_reg->getOrientation() < b ) trList.insertItem( *t_reg );
+					break;
+				case ECCENT:
+					if( t_reg->getEccentricity() > a && t_reg->getEccentricity() < b ) trList.insertItem( *t_reg );
+					break;
+				case INTNSTY:
+					if( t_reg->getIntensity() > a && t_reg->getIntensity() < b ) trList.insertItem( *t_reg );
+					break;
+			}
+		}
+
+		trList.resetList();
+		rList.resetList();
+		// iterate through the temp region list and 
+		// add pixels to the output img
+
+		cout << endl << "There are " << trList.getLength() << " regions that match that criterion." << endl;
+		
+		while( !trList.isLastItem() ){
+			trList.getNextItem( *t_reg );
+			tpList = t_reg->getPixelList();
+			tpList->resetList();
+			while( !tpList->isLastItem() ){
+				tpList->getNextItem( pix );
+				pix.getPixelVals( i , j );
+				in.setPixelVal( i , j , src.getPixelVal( i , j ) );
+			}
+		}
+		system("PAUSE");
+		
+		system("cls");
+
+		writeImage( "cregion.pgm" , in );
+	}while( (choice - 1) != QUIT);
+
+	return;
+}
+
+
 
 RGB abs( RGB pixel ){
 	// overloaded abs function

@@ -5,14 +5,13 @@ slist<PT>::slist(){
 	// constructor
 	length = 0;
 	data = NULL;
-	cpos = NULL;
 }
 
 template<class PT>
 void slist<PT>::makeEmpty(){
 	// delete all items in the list
 	node<PT> *temp = NULL;
-	while(!data = NULL){
+	while(!(data == NULL)){
 		temp = data;
 		data = data->next;
 		delete temp;
@@ -74,17 +73,20 @@ void slist<PT>::retrieveItem( PT& item , bool& found ){
 }
 
 template<class PT>
-void slist<PT>::insertItem( PT item ){
+void slist<PT>::insertItem( PT& item ){
 	// insert an item into the list
-	node<PT> *newNode, *prevLoc, *location;
+	node<PT> *newNode;
+	node<PT> *prevLoc;
+	node<PT> *location;
 	bool stop;
+
 
 	stop = false;
 	location = data;
 	prevLoc = NULL;
 
 	while( location != NULL && !stop ){
-		if( location->info > item ){
+		if( location->info < item ){
 			prevLoc = location;
 			location = location->next;
 		}
@@ -95,14 +97,15 @@ void slist<PT>::insertItem( PT item ){
 	newNode = new node<PT>;
 	newNode->info = item;
 
-	if( prevLoc = NULL ){
+	if( prevLoc == NULL ){
 		newNode->next = data;
 		data = newNode;
 	}
 	else{
 		newNode->next = location;
-		prevLoc = newNode;
+		prevLoc->next = newNode;
 	}
+
 	length++;
 	return;
 }
@@ -129,7 +132,7 @@ void slist<PT>::deleteItem( PT item ){
 }
 
 template<class PT>
-void slist<PT>::getNextItem( PT& item ){
+void slist<PT>::getNextItem( PT& item){
 	// get the next item in the list
 	item = cpos->info;
 	cpos = cpos->next;

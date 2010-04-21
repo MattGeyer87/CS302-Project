@@ -12,11 +12,11 @@ public:
 	bool isFull();
 	int getLength();
 	void retrieveItem( PT& , bool& );
-	void insertItem( PT );
+	void insertItem( PT& );
 	void deleteItem( PT );
 	void resetList();
 	bool isLastItem();
-	PT* getNextItem();
+	void getNextItem( PT& );
 private:
 	int length;
 	node<PT>* data;

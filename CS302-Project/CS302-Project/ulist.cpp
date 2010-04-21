@@ -9,13 +9,13 @@ ulist<PT>::ulist(){
 	// constructor
 	length = 0;
 	data = NULL;
-	cpos = NULL;
+
 }
 
 template<class PT>
 void ulist<PT>::makeEmpty(){
 	// delete all items in the list
-	node<PT> *temp = NULL;
+	node<PT> *temp;
 	while(data != NULL){
 		temp = data;
 		data = data->next;
@@ -30,8 +30,9 @@ ulist<PT>::~ulist(){
 	makeEmpty();
 }
 
+
 template<class PT>
-bool ulist<PT>::isFull(){
+bool ulist<PT>::isFull() const{
 	// check if the list is full
 	node<PT> *temp = new node<PT>;
 	if( !temp )
@@ -43,7 +44,7 @@ bool ulist<PT>::isFull(){
 }
 
 template<class PT>
-int ulist<PT>::getLength(){
+int ulist<PT>::getLength() const{
 	// return the length of the list
 	return length;
 }
@@ -106,15 +107,16 @@ void ulist<PT>::getNextItem( PT& item ){
 }
 
 template<class PT>
-bool ulist<PT>::isLastItem(){
-	// return if it is the last item in the list
+bool ulist<PT>::isLastItem() const{
+	// return if it is the last item in the list 
 	return( cpos == NULL );
 }
 
 template<class PT>
-void ulist<PT>::insertItem( PT item ){
+void ulist<PT>::insertItem( PT& item ){
 	// insert item 
-	node<PT> *location = new node<PT>;
+	node<PT> *location;
+	location = new node<PT>;
 	location->info = item;
 	location->next = data;
 	data = location;

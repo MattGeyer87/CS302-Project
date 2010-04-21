@@ -86,7 +86,6 @@ void computeRegionProperties( ImageType<int>& source , region& reg ){
 				  4 * ( pow( centralMoments( 1 , 1 , xbar , ybar , *ulptr ) , 2 ) ) );
 
 			
-	cout << pmin << " " << pmax << endl;
 	// determine orientation
 	rad = atan2( pmax - centralMoments( 2 , 0 , xbar , ybar , *ulptr ) , centralMoments( 1 , 1 , xbar , ybar , *ulptr ) );
 
@@ -155,17 +154,19 @@ void findComponentBFS( ImageType<int>& input , ImageType<int>& output , ulist<pi
 	return;
 }
 
-int computeComponents( ImageType<int>& input , ImageType<int>& output , slist<region>& rList ){
+int computeComponents( ImageType<int>& input , ImageType<int>& output , ImageType<int>& src, slist<region>& rList ){
 	// find the number of components in the image
 	int numComps = 0, label = 0;
-	int N, M, Q;
+	int N, M, Q, k, p;
 	
-	ulist<pixel> *ulptr = NULL;
-	region *rptr = NULL;
+	ulist<pixel> *ulptr;
+	region *rptr = new region;
 	pixel seed;
 	
 	input.getImageInfo( N, M, Q);
 	output.setWhite();
+
+	rList.resetList();
 
 	for( int i = 0; i < N; i++){
 		for( int j = 0; j < M; j++ ){
@@ -174,30 +175,30 @@ int computeComponents( ImageType<int>& input , ImageType<int>& output , slist<re
 				label = numComps;
 				seed.setPixelVals( i , j );
 				
-				// instantiate new region and pixel list
-				rptr = new region;
-				ulptr = new ulist<pixel>;
-				rptr->setPixelList( ulptr );
-
-				
-				
+		
+				ulptr = rptr->getPixelList();
+								
 				// populate the pixel list and label the output image
 				findComponentBFS( input, output, *ulptr, seed, label );
-				
-				cout << ( rptr->getPixelList() )->getLength() << endl; 
+			
 
 				//set the size of the region
 				rptr->setSize( ulptr->getLength() );
-				cout << ulptr->getLength() << endl;
+				
 				
 				// threshold region and perform classification steps
-				if( rptr->getSize() > 5 )
+				if( rptr->getSize() > 5 ){
+					computeRegionProperties( src , *rptr );
 					// insert into the list of regions
 					rList.insertItem( *rptr );
+				}
+
+				ulptr->makeEmpty();
 
 			}
 		}
 	}
+
 	return numComps;
 }
 	

@@ -5,6 +5,7 @@
 class pixel{
 public:
 	pixel();
+	pixel( const pixel& );
 	pixel& operator = ( const pixel& );
 	pixel(int,int);
 	void setPixelVals( int, int);
